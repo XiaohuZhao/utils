@@ -11,7 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Optional;
 
 /**
@@ -25,7 +27,7 @@ import java.util.Optional;
 @Aspect
 @Component
 public class LoggerInterceptor {
-    private static final String LOG_FORMAT = "[AOP-LOG]->Method {}: {}";
+    private static final String LOG_FORMAT = "[AOP-INFO][{}]->Method {}: {}";
     private static final String BEGIN = "begin";
     private static final String END = "end";
     private static final String PARAMS = "params";
@@ -43,6 +45,10 @@ public class LoggerInterceptor {
         return result;
     }
 
+    private String formatDate() {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+    }
+
     /**
      * 如果有@SysLogger注解采取的动作
      *
@@ -57,11 +63,11 @@ public class LoggerInterceptor {
         Signature signature = point.getSignature();
         boolean print = isPrint(targetClass, signature.toLongString());
         System.out.println();
-        LOGGER.info(LOG_FORMAT, BEGIN, signature.getName());
+        LOGGER.info(LOG_FORMAT, formatDate(), BEGIN, signature);
         printParams(point, LOGGER, print);
         Object result = point.proceed();
         printResult(LOGGER, print, result);
-        LOGGER.info(LOG_FORMAT, END, signature.getName());
+        LOGGER.info(LOG_FORMAT, formatDate(), END, signature);
         System.out.println();
         return result;
     }
@@ -76,7 +82,7 @@ public class LoggerInterceptor {
     private void printResult(Logger logger, boolean print, Object result) {
         if (print) {
             Optional.ofNullable(result)
-                    .ifPresent(o -> logger.info(LOG_FORMAT, RESULT, o));
+                    .ifPresent(o -> logger.info(LOG_FORMAT, formatDate(), RESULT, o));
         }
     }
 
@@ -93,7 +99,7 @@ public class LoggerInterceptor {
             if (args.length == 0) {
                 return;
             }
-            logger.info(LOG_FORMAT, PARAMS, toJsonString(args));
+            logger.info(LOG_FORMAT, formatDate(), PARAMS, toJsonString(args));
         }
     }
 
