@@ -103,14 +103,12 @@ public class XmlGenerator {
     }
 
     /**
-     * 解析XML文件,获取报文文件对应的文件名(不包含扩展名)
+     * 解析XML文件,获取指定节点的值
      *
-     * @param xmlStr 带有报关类型的xml字符串
-     * @return 报文文件的messageId
+     * @param xmlStr xml字符串
+     * @return 指定节点的值
      */
-    public static String getXmlFileName(String xmlStr) {
-        // 获取文件名并使用正则表达式判断文件名是否符合规则
-        String regMessageId = "^CN_(MT2201|MT3201|MT4201|MT5202)_[1-9]p[0-9]_4302560757589_\\d{17}.xml$";
+    public static String getElementValue(String xmlStr, String elementName) {
         Document xmlDocument;
         try {
             // 解析字符串内容生成xml节点
@@ -123,19 +121,13 @@ public class XmlGenerator {
 
         // 获取根节点进行遍历
         Element rootElement = xmlDocument.getRootElement();
-        traversalElement(rootElement);
+        traversalElement(rootElement, elementName);
         // 如果遍历后节点依然为空, 说明没有找到此节点
         if (element == null) {
-            logger.info("xml内容中找不到指定节点\"MessageID\"");
-            throw new RuntimeException("xml内容中找不到指定节点\"MessageID\"");
+            logger.info(String.format("xml内容中找不到指定节点\"%s\"", elementName));
+            throw new RuntimeException(String.format("xml内容中找不到指定节点\"%s\"", elementName));
         }
-        String xmlFileName = element.getText() + ".xml";
-
-        if (!xmlFileName.matches(regMessageId)) {
-            logger.info("xml内容不正确");
-            throw new IllegalArgumentException("xml内容不正确");
-        }
-        return xmlFileName;
+        return element.getText() + ".xml";
     }
 
     /**
@@ -145,11 +137,11 @@ public class XmlGenerator {
      * @param rootElement 要遍历的父节点
      */
     @SuppressWarnings({"unchecked", "LoopStatementThatDoesntLoop"})
-    private static void traversalElement(final Element rootElement) {
+    private static void traversalElement(final Element rootElement, String elementName) {
         final List<Element> elements = rootElement.elements();
         for (Element element : elements) {
-            if (!"MessageID".equals(element.getName())) {
-                traversalElement(element);
+            if (!elementName.equals(element.getName())) {
+                traversalElement(element, elementName);
             } else {
                 XmlGenerator.element = element;
             }
