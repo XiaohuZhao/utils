@@ -27,11 +27,12 @@ import java.util.Optional;
 @Aspect
 @Component
 public class LoggerInterceptor {
-    private static final String LOG_FORMAT = "[AOP-INFO][{}]->Method {}: {}";
-    private static final String BEGIN = "begin";
-    private static final String END = "end";
-    private static final String PARAMS = "params";
-    private static final String RESULT = "result";
+    private static final String LOG_FORMAT = "[INFO][{}]->方法{}: {}";
+    private static final String BEGIN = "开始执行";
+    private static final String END = "执行结束";
+    private static final String PARAMS = "参数列表";
+    private static final String RESULT = "执行结果";
+    private static final String TIME = "执行用时";
     private static Logger LOGGER;
 
     private static String toJsonString(Object object) {
@@ -57,7 +58,8 @@ public class LoggerInterceptor {
      * @throws Throwable 方法抛出的异常
      */
     @Around(value = "@within(com.yorma.common.utils.logger.annotation.SysLogger) || @annotation(com.yorma.common.utils.logger.annotation.SysLogger)")
-    public Object test(ProceedingJoinPoint point) throws Throwable {
+    public Object logger(ProceedingJoinPoint point) throws Throwable {
+        final long begin = System.currentTimeMillis();
         Class targetClass = point.getTarget().getClass();
         LOGGER = LoggerFactory.getLogger(targetClass);
         Signature signature = point.getSignature();
@@ -68,6 +70,9 @@ public class LoggerInterceptor {
         Object result = point.proceed();
         printResult(LOGGER, print, result);
         LOGGER.info(LOG_FORMAT, formatDate(), END, signature);
+        final long end = System.currentTimeMillis();
+        LOGGER.info(LOG_FORMAT, formatDate(), TIME, (end - begin) + "ms");
+        // "[AOP-INFO][{}]->方法{}: {}"
         System.out.println();
         return result;
     }

@@ -29,10 +29,8 @@ import static org.dom4j.DocumentHelper.parseText;
  */
 public class XmlGenerator {
     private static final Logger logger = LoggerFactory.getLogger(XmlGenerator.class);
-    /**
-     * 储存找到的指定节点
-     */
-    private static Element element = null;
+
+    private static Element target;
 
     public static String generateXmlStr(Transformable xmlObj) throws JAXBException {
         // 设置xml装配器
@@ -103,12 +101,12 @@ public class XmlGenerator {
     }
 
     /**
-     * 解析XML文件,获取指定节点的值
+     * <p>解析XML文件,获取指定节点的值</p>
      *
      * @param xmlStr xml字符串
      * @return 指定节点的值
      */
-    public static String getElementValue(String xmlStr, String elementName) {
+    public static String getElementValue(String xmlStr, String elementNameSelector) {
         Document xmlDocument;
         try {
             // 解析字符串内容生成xml节点
@@ -120,32 +118,42 @@ public class XmlGenerator {
         }
 
         // 获取根节点进行遍历
-        Element rootElement = xmlDocument.getRootElement();
-        traversalElement(rootElement, elementName);
-        // 如果遍历后节点依然为空, 说明没有找到此节点
-        if (element == null) {
-            logger.info(String.format("xml内容中找不到指定节点\"%s\"", elementName));
-            throw new RuntimeException(String.format("xml内容中找不到指定节点\"%s\"", elementName));
+        target = xmlDocument.getRootElement();
+
+        final String[] elementNames = elementNameSelector.split(">");
+        for (String elementName : elementNames) {
+            traversalElement(target, elementName.trim());
         }
-        return element.getText() + ".xml";
+        // 如果遍历后节点依然为空, 说明没有找到此节点
+        if (!target.getName().equals(elementNames[elementNames.length - 1])) {
+            logger.info(String.format("xml内容中找不到指定节点\"%s\"", elementNameSelector));
+            throw new RuntimeException(String.format("xml内容中找不到指定节点\"%s\"", elementNameSelector));
+        }
+        return target.getText();
     }
 
     /**
      * <p>递归遍历xml文件的各个节点和其子节点</p>
-     * <p>找到MessageID节点</p>
+     * <p>找到第一个名为elementName节点</p>
      *
      * @param rootElement 要遍历的父节点
+     * @param elementName 要查找的节点名
      */
-    @SuppressWarnings({"unchecked", "LoopStatementThatDoesntLoop"})
-    private static void traversalElement(final Element rootElement, String elementName) {
-        final List<Element> elements = rootElement.elements();
-        for (Element element : elements) {
-            if (!elementName.equals(element.getName())) {
-                traversalElement(element, elementName);
-            } else {
-                XmlGenerator.element = element;
+    @SuppressWarnings("unchecked")
+    private static void traversalElement(Element rootElement, String elementName) {
+        if (rootElement != null) {
+            if (elementName.equals(rootElement.getName())) {
+                return;
             }
-            return;
+            final List<Element> elements = rootElement.elements();
+            for (Element element : elements) {
+                if (!elementName.equals(element.getName())) {
+                    traversalElement(element, elementName);
+                } else {
+                    target = element;
+                    return;
+                }
+            }
         }
     }
 }
