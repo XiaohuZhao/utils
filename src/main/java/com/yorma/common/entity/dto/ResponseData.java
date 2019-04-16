@@ -86,4 +86,20 @@ public class ResponseData<T> implements Serializable {
         this.list = list;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"pageSize\":" +
+                pageSize +
+                ",\"totalPage\":" +
+                totalPage +
+                ",\"pageNumber\":" +
+                pageNumber +
+                ",\"totalRow\":" +
+                totalRow +
+                ",\"list\":" +
+                list +
+                '}';
+    }
 }

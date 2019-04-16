@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Optional;
 
 /**
  * 拦截方法,判断是否有@SysLogger注解并采取动作
@@ -33,6 +32,7 @@ public class LoggerInterceptor {
     private static final String PARAMS = "参数列表";
     private static final String RESULT = "执行结果";
     private static final String TIME = "执行用时";
+    private static final String CURRENT_THREAD = "当前线程";
     private static Logger LOGGER;
 
     private static String toJsonString(Object object) {
@@ -65,14 +65,20 @@ public class LoggerInterceptor {
         Signature signature = point.getSignature();
         boolean print = isPrint(targetClass, signature.toLongString());
         System.out.println();
+        LOGGER.info(LOG_FORMAT, formatDate(), CURRENT_THREAD, Thread.currentThread().getName());
         LOGGER.info(LOG_FORMAT, formatDate(), BEGIN, signature);
         printParams(point, LOGGER, print);
-        Object result = point.proceed();
-        printResult(LOGGER, print, result);
+        Object result = null;
+        try {
+            result = point.proceed();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            LOGGER.error(throwable.toString());
+        }
         LOGGER.info(LOG_FORMAT, formatDate(), END, signature);
+        printResult(LOGGER, print, result);
         final long end = System.currentTimeMillis();
         LOGGER.info(LOG_FORMAT, formatDate(), TIME, (end - begin) + "ms");
-        // "[AOP-INFO][{}]->方法{}: {}"
         System.out.println();
         return result;
     }
@@ -86,8 +92,7 @@ public class LoggerInterceptor {
      */
     private void printResult(Logger logger, boolean print, Object result) {
         if (print) {
-            Optional.ofNullable(result)
-                    .ifPresent(o -> logger.info(LOG_FORMAT, formatDate(), RESULT, o));
+            logger.info(LOG_FORMAT, formatDate(), RESULT, toJsonString(result));
         }
     }
 

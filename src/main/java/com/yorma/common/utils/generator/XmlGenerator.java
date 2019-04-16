@@ -1,7 +1,5 @@
 package com.yorma.common.utils.generator;
 
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
@@ -15,9 +13,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import java.io.StringWriter;
-import java.util.List;
-
-import static org.dom4j.DocumentHelper.parseText;
 
 /**
  * xml实体类生成xml字符或文件
@@ -98,62 +93,5 @@ public class XmlGenerator {
         xmlFilter.setContentHandler(xmlWriter);
         marshaller.marshal(xmlObj, xmlFilter);
         return out.toString();
-    }
-
-    /**
-     * <p>解析XML文件,获取指定节点的值</p>
-     *
-     * @param xmlStr xml字符串
-     * @return 指定节点的值
-     */
-    public static String getElementValue(String xmlStr, String elementNameSelector) {
-        Document xmlDocument;
-        try {
-            // 解析字符串内容生成xml节点
-            xmlDocument = parseText(xmlStr);
-        } catch (DocumentException e) {
-            e.printStackTrace();
-            logger.info("解析xml内容时出现异常:[{}]", e.getMessage());
-            throw new RuntimeException("xml内容解析失败");
-        }
-
-        // 获取根节点进行遍历
-        target = xmlDocument.getRootElement();
-
-        final String[] elementNames = elementNameSelector.split(">");
-        for (String elementName : elementNames) {
-            traversalElement(target, elementName.trim());
-        }
-        // 如果遍历后节点依然为空, 说明没有找到此节点
-        if (!target.getName().equals(elementNames[elementNames.length - 1])) {
-            logger.info(String.format("xml内容中找不到指定节点\"%s\"", elementNameSelector));
-            throw new RuntimeException(String.format("xml内容中找不到指定节点\"%s\"", elementNameSelector));
-        }
-        return target.getText();
-    }
-
-    /**
-     * <p>递归遍历xml文件的各个节点和其子节点</p>
-     * <p>找到第一个名为elementName节点</p>
-     *
-     * @param rootElement 要遍历的父节点
-     * @param elementName 要查找的节点名
-     */
-    @SuppressWarnings("unchecked")
-    private static void traversalElement(Element rootElement, String elementName) {
-        if (rootElement != null) {
-            if (elementName.equals(rootElement.getName())) {
-                return;
-            }
-            final List<Element> elements = rootElement.elements();
-            for (Element element : elements) {
-                if (!elementName.equals(element.getName())) {
-                    traversalElement(element, elementName);
-                } else {
-                    target = element;
-                    return;
-                }
-            }
-        }
     }
 }
