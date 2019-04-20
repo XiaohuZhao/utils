@@ -1,5 +1,14 @@
 package com.yorma.common.utils.object;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.util.CollectionUtils;
+
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+
 /**
  * 处理对象的一些方法
  *
@@ -41,14 +50,78 @@ public class ObjectUtil {
     }
 
     /**
-     * 判断对象是否为空
+     * <p>判断对象是否为空</p>
+     * <p>引用指向的地址为空</p>
+     * <p>指向的值不存在</p>
+     * <p>字符串的长度为0</p>
+     * <p>集合的长度为0</p>
+     * <p>数组(引用类型)长度为0</p>
+     * <p>实体对象的每个属性都为空</p>
      *
      * @param t   要判断的对象
      * @param <T> 参数的类型
      * @return 是否为空
      */
     public static <T> boolean isEmpty(T t) {
-        return null == t || t.toString().trim().isEmpty();
+        if (null == t) {
+            return true;
+        } else if (t instanceof Optional) {
+            return !((Optional) t).isPresent();
+        } else if (t instanceof String) {
+            return ((String) t).trim().length() == 0;
+        } else if (t instanceof Collection) {
+            return CollectionUtils.isEmpty((Collection) t);
+        } else if (t instanceof Map) {
+            return CollectionUtils.isEmpty((Map) t);
+        } else if (t.getClass().isArray()) {
+            return ArrayUtils.isEmpty((Object[]) t);
+        } else {
+            final Field[] fields = t.getClass().getDeclaredFields();
+            return Arrays.stream(fields).noneMatch(field -> {
+                field.setAccessible(true);
+                try {
+                    return field.get(t) != null;
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
     }
 
+    /**
+     * <p>判断对象是否不为空</p>
+     * <p>引用指向的地址不为空</p>
+     * <p>指向的值存在</p>
+     * <p>字符串的长度大于0</p>
+     * <p>集合的长度大于0</p>
+     * <p>数组(引用类型)长度大于0</p>
+     * <p>实体对象至少有一个属性不为空</p>
+     *
+     * @param t   要判断的对象
+     * @param <T> 参数的类型
+     * @return 是否为空
+     */
+    public static <T> boolean isNotEmpty(T t) {
+        return !isEmpty(t);
+    }
+
+    /**
+     * 将对象转成int类型的数字
+     *
+     * @param o 要转的对象
+     * @return 对象中的数字
+     */
+    public static int parseInt(Object o) {
+        if (isEmpty(o)) {
+            throw new NullPointerException("转换的对象不可为空");
+        }
+        return Integer.parseInt(o.toString());
+    }
+
+    public static double parseDouble(Object o) {
+        if (isEmpty(o)) {
+            throw new NullPointerException("转换的对象不可为空");
+        }
+        return Double.parseDouble(o.toString());
+    }
 }
