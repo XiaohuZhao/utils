@@ -3,6 +3,8 @@ package com.yorma.common.utils.collection;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.util.Collections.sort;
+
 /**
  * <p>双键Map集合</p>
  * <p>包含put、get</p>
@@ -101,7 +103,7 @@ public class DoubleKeyMap<K1, K2, V> {
 
     public List<V> getSortedListOfAll(Comparator<V> comparator) {
         final List<V> list = getListOfAll();
-        Collections.sort(list, comparator);
+        sort(list, comparator);
         return list;
     }
 
@@ -113,7 +115,7 @@ public class DoubleKeyMap<K1, K2, V> {
 
     public List<V> getSortedListOfSubKey(K1 k1, Comparator<V> comparator) {
         final List<V> list = getListOfSubKey(k1);
-        Collections.sort(list, comparator);
+        sort(list, comparator);
         return list;
     }
 }

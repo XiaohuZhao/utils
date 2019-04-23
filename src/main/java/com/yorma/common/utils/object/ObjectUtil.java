@@ -3,7 +3,6 @@ package com.yorma.common.utils.object;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.util.CollectionUtils;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -76,8 +75,7 @@ public class ObjectUtil {
         } else if (t.getClass().isArray()) {
             return ArrayUtils.isEmpty((Object[]) t);
         } else {
-            final Field[] fields = t.getClass().getDeclaredFields();
-            return Arrays.stream(fields).noneMatch(field -> {
+            return Arrays.stream(t.getClass().getDeclaredFields()).noneMatch(field -> {
                 field.setAccessible(true);
                 try {
                     return field.get(t) != null;
