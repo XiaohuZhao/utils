@@ -24,7 +24,7 @@ public class DoubleKeyMap<K1, K2, V> {
     }
 
     public DoubleKeyMap(int size) {
-        this(false);
+        this(false, size);
     }
 
     public DoubleKeyMap(boolean ordered) {
