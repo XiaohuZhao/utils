@@ -1,6 +1,5 @@
 package com.yorma.common.utils.object;
 
-import java.lang.reflect.Constructor;    
 import java.lang.reflect.Field;    
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -12,10 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;    
 import java.util.Set; 
-
-  
-import java.beans.BeanInfo;  
-import java.beans.Introspector;  
 import java.beans.PropertyDescriptor;  
 /**
  * @author 窦琪
@@ -34,7 +29,7 @@ public class CopyUtils {
      * @param c 指定类型  
      * @return 如果不需要复制则返回真，否则返回假  
      */    
-    private static boolean isNeedlessClone(Class c){    
+    private static boolean isNeedlessClone(Class c){
         if(c.isPrimitive()){//基本类型    
             return true;    
         }    
@@ -197,12 +192,13 @@ public class CopyUtils {
      * @param castClass 转换后的类
      * @return 转换后的对象
      */
-    public static  <T1,T2> T2 convertBean(T1 orimodel, Class<T2> castClass) {
-        T2 returnModel = null;
+    public static  <T1,T2> T2 convertBean(T1 orimodel, T2 newObj) {
+        T2 returnModel = newObj;
+        Class castClass=null;
         try {
-            returnModel = castClass.newInstance();
+           castClass=newObj.getClass();
         } catch (Exception e) {
-            throw new RuntimeException("创建"+castClass.getName()+"对象失败");
+            throw new RuntimeException("获取 " + newObj + " 类失败");
         } 
         List<Field> fieldlist = new ArrayList<Field>(); //要转换的字段集合
         while (castClass != null && //循环获取要转换的字段,包括父类的字段
@@ -210,23 +206,33 @@ public class CopyUtils {
             fieldlist.addAll(Arrays.asList(castClass.getDeclaredFields()));
             castClass = (Class<T2>) castClass.getSuperclass(); //得到父类,然后赋给自己
         }
-        for (Field field : fieldlist) {
-            PropertyDescriptor getpd = null;
-            PropertyDescriptor setpd = null;
-            try {
-                getpd= new PropertyDescriptor(field.getName(), orimodel.getClass());
-                setpd=new PropertyDescriptor(field.getName(), returnModel.getClass());
+		for (Field field : fieldlist) {
+			// ZJ@2019-05-08
+			try {
+				String xetter = field.getName().substring(0,1).toUpperCase() + field.getName().substring(1);
+
+				Method getMethod = orimodel.getClass().getDeclaredMethod("get" + xetter);
+				Object transValue = getMethod.invoke(orimodel);
+
+				String setter = "set" + xetter;
+				Method mySetter = null;
+				try {
+					mySetter = returnModel.getClass().getDeclaredMethod(setter, field.getType());
+					mySetter.invoke(returnModel, transValue);
+				}catch(NoSuchMethodException e){// setter: Long-->long Integer-->int
+					if( field.getType().equals(Long.class)){
+						mySetter = returnModel.getClass().getDeclaredMethod(setter, long.class);
+					}
+					if( field.getType().equals(Integer.class)){
+						mySetter = returnModel.getClass().getDeclaredMethod(setter, int.class);
+					}
+					mySetter.invoke(returnModel, transValue);
+				}
+
             } catch (Exception e) {
+                new RuntimeException("cast "+orimodel.getClass().getName()+"to "
+                        +castClass.getName()+" failed").printStackTrace();;
                 continue;
-            }
-            try {
-                Method getMethod = getpd.getReadMethod();
-                Object transValue = getMethod.invoke(orimodel);
-                Method setMethod = setpd.getWriteMethod();
-                setMethod.invoke(returnModel, transValue);
-            } catch (Exception e) {
-                throw  new RuntimeException("cast "+orimodel.getClass().getName()+"to "
-                        +castClass.getName()+" failed");
             }
         }
         return returnModel;

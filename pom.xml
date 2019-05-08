@@ -8,7 +8,7 @@
     <groupId>com.yorma</groupId>
     <artifactId>common-util-spring</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
@@ -42,10 +42,10 @@
             <artifactId>commons-net</artifactId>
             <version>3.6</version>
         </dependency>
-        <dependency>
+         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>4.3.10.RELEASE</version>
+            <version>4.3.11.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

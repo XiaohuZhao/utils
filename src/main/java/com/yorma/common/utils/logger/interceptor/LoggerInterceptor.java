@@ -163,7 +163,7 @@ public class LoggerInterceptor {
 		String C_RS_MSG = "com.yorma.common.entity.dto.ResponseMessage";
 		String C_RS_DATA = "com.yorma.common.entity.dto.ResponseData";
 
-		System.err.println("Classssss: " + object.getClass().getName());
+//		System.err.println("Classssss: " + object.getClass().getName());
 
 		Object r = object;
 		Object d = null;
@@ -215,7 +215,6 @@ public class LoggerInterceptor {
 				d = null;
 			}else {
 				System.out.println("Others..........: " + r.getClass());
-				r = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
 			}
 
 			if(map != null) {
