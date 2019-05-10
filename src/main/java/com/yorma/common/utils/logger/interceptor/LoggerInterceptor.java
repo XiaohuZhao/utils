@@ -150,14 +150,17 @@ public class LoggerInterceptor {
 						.anyMatch(method -> method.getAnnotation(SysLogger.class).print());
 	}
 
-	/**
-	 * 简化 List<T> 日志输出信息
-	 * 
-	 * @param object
-	 * @return
-	 */
-	private static Object simplifyResult(Object object, StringBuffer x) {
 
+
+
+    /**
+     * 简化 List<T> 日志输出信息
+     *
+     * @param object        方法实际返回结果
+     * @param resultBuilder 拼接输出结果
+     * @return 简化后的返回结果
+     */
+	private static Object simplifyResult(Object object, StringBuffer x) {
 		String C_RS_MSG = "com.yorma.common.entity.dto.ResponseMessage";
 		String C_RS_DATA = "com.yorma.common.entity.dto.ResponseData";
 
