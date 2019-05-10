@@ -158,14 +158,16 @@ public class LoggerInterceptor {
         try {
             final Class<?> responseMessageClass = Class.forName(RESPONSE_MESSAGE);
             final Class<?> responseDataClass = Class.forName(RESPONSE_DATA);
-            if (object.getClass().equals(responseMessageClass)) {
+            if (object == null) {
+                return object;
+            } else if (responseMessageClass.equals(object.getClass())) {
                 // 获取getData方法, 获取responseMessage中的data数据
                 final Method getDataMethod = responseMessageClass.getDeclaredMethod("getData");
                 Object data = getDataMethod.invoke(object);
                 data = dataHandler(data, resultBuilder);
                 final Method setDataMethod = responseMessageClass.getDeclaredMethod("setData", Object.class);
                 setDataMethod.invoke(newObj, data);
-            } else if (object.getClass().equals(responseDataClass)) {
+            } else if (responseDataClass.equals(object.getClass())) {
                 final Method getListMethod = responseMessageClass.getDeclaredMethod("getList");
                 Object list = getListMethod.invoke(object);
                 list = dataHandler(list, resultBuilder);

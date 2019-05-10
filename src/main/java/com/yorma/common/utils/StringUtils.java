@@ -1,5 +1,7 @@
 package com.yorma.common.utils;
 
+import static com.yorma.common.utils.object.ObjectUtil.isEmpty;
+
 /**
  * @author zxh
  */
@@ -219,5 +221,13 @@ public class StringUtils {
         }
         /* 开始截取 */
         return str.substring(strStartIndex, strEndIndex).substring(strStart.length());
+    }
+    
+    public static String concat(String orign, String s) {
+        if (isEmpty(s)) {
+            return orign;
+        } else {
+            return orign.concat(s);
+        }
     }
 }
