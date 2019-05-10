@@ -50,7 +50,6 @@ public class LoggerInterceptor {
 			Object l = simplifyResult(object, x);
 			if (l != null) {
 				result = objectMapper.writeValueAsString(l).replace("}]", "}......first 10 of " + x + " ]");
-
 			} else
 				result = objectMapper.writeValueAsString(object);
 		} catch (JsonProcessingException e) {
@@ -255,22 +254,16 @@ public class LoggerInterceptor {
 		} catch (ClassNotFoundException e) {
 
 		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

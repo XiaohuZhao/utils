@@ -1,7 +1,10 @@
 package com.yorma.common.utils.collection;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
 import static java.util.Collections.sort;
 
@@ -14,7 +17,7 @@ import static java.util.Collections.sort;
  * @author zxh
  */
 @SuppressWarnings("ALL")
-public class DoubleKeyMap<K1, K2, V> {
+public class DoubleKeyMap<K1, K2, V> implements Serializable {
     private Map<K1, Map<K2, V>> map;
 
     private boolean ordered;
@@ -49,6 +52,13 @@ public class DoubleKeyMap<K1, K2, V> {
 
     public Boolean put(K1 k1, Map<K2, V> subMap) {
         return map.put(k1, subMap) != null;
+    }
+
+    public Boolean put(DoubleKeyMap<K1, K2, V> doubleKeyMap) {
+        doubleKeyMap.forEach((k1, k2, v) -> {
+            this.put(k1, k2, v);
+        });
+        return true;
     }
 
     public Map<K2, V> get(K1 k1) {
@@ -122,5 +132,23 @@ public class DoubleKeyMap<K1, K2, V> {
         final List<V> list = getListOfSubKey(k1);
         sort(list, comparator);
         return list;
+    }
+
+    public void forEach(TriConsumer<K1, K2, V> consumer) {
+        map.forEach((k1, subMap) -> {
+            subMap.forEach((k2, v) -> {
+                consumer.accept(k1, k2, v);
+            });
+        });
+    }
+
+    public void forEach(BiConsumer<K1, Map<K2, V>> consumer) {
+        map.forEach((k1, subMap) -> {
+            consumer.accept(k1, subMap);
+        });
+    }
+    
+    public Stream<Map.Entry<K1, Map<K2, V>>> stream(){
+        return map.entrySet().stream();
     }
 }

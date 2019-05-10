@@ -1,6 +1,5 @@
 package com.yorma.common.utils.generator;
 
-import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 import org.slf4j.Logger;
@@ -24,8 +23,6 @@ import java.io.StringWriter;
  */
 public class XmlGenerator {
     private static final Logger logger = LoggerFactory.getLogger(XmlGenerator.class);
-
-    private static Element target;
 
     public static String generateXmlStr(Transformable xmlObj) throws JAXBException {
         // 设置xml装配器
