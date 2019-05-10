@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import static com.yorma.common.utils.object.ObjectUtil.isNotEmpty;
+
 /**
  * @author yangying
  */
@@ -138,10 +140,9 @@ public class PackageUtil {
      * @return 类的完整名称
      */
     private static Set<String> getClassNameByJars(URL[] urls, String packagePath, boolean childPackage) throws IOException {
-        Set<String> myClassName = new HashSet<>();
-        if (urls != null) {
-            for (int i = 0; i < urls.length; i++) {
-                URL url = urls[i];
+        final Set<String> myClassName = new HashSet<>();
+        if (isNotEmpty(urls)) {
+            for (URL url : urls) {
                 String urlPath = url.getPath();
                 // 不必搜索classes文件夹
                 if (urlPath.endsWith(String.format("classes%s", File.separator))) {

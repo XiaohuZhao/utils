@@ -12,6 +12,7 @@ import static org.dom4j.DocumentHelper.parseText;
 
 /**
  * xml文档工具类
+ * @author zxh
  */
 public class XmlDocument {
     private static Document document;
@@ -73,7 +74,6 @@ public class XmlDocument {
      * @param rootElement 要遍历的父节点
      * @param elementName 要查找的节点名
      */
-    @SuppressWarnings("unchecked")
     private void traversalElements(List<Element> collect, Element rootElement, String elementName, String targetName) {
         if (rootElement != null) {
             if (elementName.equals(rootElement.getName())) {
@@ -119,10 +119,8 @@ public class XmlDocument {
      * @param rootElement 要遍历的父节点
      * @param elementName 当前查找的节点名
      */
-    @SuppressWarnings({"unchecked"})
     private void traversalElement(Element rootElement, String elementName) {
         if (rootElement != null) {
-            System.out.println("正在遍历:" + rootElement.getName());
             if (elementName.equals(rootElement.getName())) {
                 target = rootElement;
                 return;

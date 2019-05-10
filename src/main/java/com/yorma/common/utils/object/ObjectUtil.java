@@ -23,7 +23,7 @@ public class ObjectUtil {
      */
     public static <T> T required(T t) {
         if (isEmpty(t)) {
-            throw new NullPointerException("必要的属性值为空！");
+            throw new NullPointerException("必要的对象或属性值为空！");
         }
         return t;
     }

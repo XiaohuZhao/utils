@@ -1,5 +1,7 @@
 package com.yorma.common.utils.generator;
 
+import java.io.Serializable;
+
 /**
  * 传输类转换成xml实体类继承的接口
  *
@@ -8,7 +10,7 @@ package com.yorma.common.utils.generator;
  * @date 2019/03/28
  * @since 1.0.0
  */
-public interface Transformable<T> {
+public interface Transformable<T> extends Serializable {
     /**
      * 将对象转换成可生成报文的对象
      *

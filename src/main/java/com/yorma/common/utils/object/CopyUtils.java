@@ -10,7 +10,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;    
-import java.util.Set; 
+import java.util.Set;
+import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;  
 /**
  * @author 窦琪
@@ -184,6 +185,7 @@ public class CopyUtils {
     public static Object deepClone(Object value) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException{    
         return clone(value,-1);    
     } 
+
     /**
      * 将一个对象转换为另一个对象
      * @param <T1> 要转换的对象
@@ -196,9 +198,9 @@ public class CopyUtils {
         T2 returnModel = newObj;
         Class castClass=null;
         try {
-           castClass=newObj.getClass();
+           castClass = newObj.getClass();
         } catch (Exception e) {
-            throw new RuntimeException("获取 " + newObj + " 类失败");
+            throw new RuntimeException("创建"+castClass.getName()+"对象失败");
         } 
         List<Field> fieldlist = new ArrayList<Field>(); //要转换的字段集合
         while (castClass != null && //循环获取要转换的字段,包括父类的字段
@@ -206,35 +208,114 @@ public class CopyUtils {
             fieldlist.addAll(Arrays.asList(castClass.getDeclaredFields()));
             castClass = (Class<T2>) castClass.getSuperclass(); //得到父类,然后赋给自己
         }
+
 		for (Field field : fieldlist) {
-			// ZJ@2019-05-08
-			try {
-				String xetter = field.getName().substring(0,1).toUpperCase() + field.getName().substring(1);
-
-				Method getMethod = orimodel.getClass().getDeclaredMethod("get" + xetter);
-				Object transValue = getMethod.invoke(orimodel);
-
-				String setter = "set" + xetter;
-				Method mySetter = null;
-				try {
-					mySetter = returnModel.getClass().getDeclaredMethod(setter, field.getType());
-					mySetter.invoke(returnModel, transValue);
-				}catch(NoSuchMethodException e){// setter: Long-->long Integer-->int
-					if( field.getType().equals(Long.class)){
-						mySetter = returnModel.getClass().getDeclaredMethod(setter, long.class);
-					}
-					if( field.getType().equals(Integer.class)){
-						mySetter = returnModel.getClass().getDeclaredMethod(setter, int.class);
-					}
-					mySetter.invoke(returnModel, transValue);
-				}
-
-            } catch (Exception e) {
-                new RuntimeException("cast "+orimodel.getClass().getName()+"to "
-                        +castClass.getName()+" failed").printStackTrace();;
-                continue;
+			// ZJ @ 2019-05-10 修改后的方法支持非标准的get,set属性
+			if(setVal1(field, orimodel, returnModel) || setVal2(field, orimodel, returnModel)
+					|| setVal3(field, orimodel, returnModel)) {
+			}else {
+				System.out.printf("%s ==> %s 复制值 %s 失败!\r\n", orimodel.getClass().getName(), returnModel.getClass().getName(), field.getName());
+//				new RuntimeException("cast "+ orimodel.getClass().getName()+" to "
+//	                        + returnModel.getClass().getName()+" failed").printStackTrace();
             }
         }
+
         return returnModel;
+    }
+
+    /**
+     * 
+     * @param field
+     * @param orimodel
+     * @param returnModel
+     * @return
+     */
+    private static <T1, T2> boolean setVal1(Field field, T1 orimodel, T2 returnModel) {
+    	boolean b = false;
+
+		try {
+	        PropertyDescriptor getpd = new PropertyDescriptor(field.getName(), orimodel.getClass());
+	        PropertyDescriptor setpd=new PropertyDescriptor(field.getName(), returnModel.getClass());
+	
+	        Method getMethod = getpd.getReadMethod();
+	        Object transValue = getMethod.invoke(orimodel);
+	        Method setMethod = setpd.getWriteMethod();
+	        setMethod.invoke(returnModel, transValue);
+	        
+	        b = true;
+		} catch (Exception e) {
+//			e.printStackTrace();
+		}
+
+        return b;
+	}
+
+    /**
+     * 
+     * @param field
+     * @param orimodel
+     * @param returnModel
+     * @return
+     */
+    private static <T1, T2> boolean setVal2(Field field, T1 orimodel, T2 returnModel) {
+    	boolean b = false;
+
+    	try {
+	    	String xetter = field.getName().substring(0,1).toUpperCase() + field.getName().substring(1);
+			Method getMethod = orimodel.getClass().getDeclaredMethod("get" + xetter);
+			Object transValue = getMethod.invoke(orimodel);
+	
+			String setter = "set" + xetter;
+			Method mySetter = null;
+			try {
+				mySetter = returnModel.getClass().getDeclaredMethod(setter, field.getType());
+				mySetter.invoke(returnModel, transValue);
+				b = true;
+			}catch(NoSuchMethodException e){// setter: Long-->long Integer-->int
+				if( field.getType().equals(Long.class)){
+					mySetter = returnModel.getClass().getDeclaredMethod(setter, long.class);
+				}
+				if( field.getType().equals(Integer.class)){
+					mySetter = returnModel.getClass().getDeclaredMethod(setter, int.class);
+				}
+				mySetter.invoke(returnModel, transValue);
+				b = true;
+			}
+    	} catch (Exception e1) {
+//    		e1.printStackTrace();
+		}
+
+    	return b;
+    }
+    
+    private static <T1, T2> boolean setVal3(Field field, T1 orimodel, T2 returnModel) {
+    	boolean b = false;
+
+    	try {
+	    	String xetter = field.getName();
+			Method getMethod = orimodel.getClass().getDeclaredMethod("get" + xetter);
+			Object transValue = getMethod.invoke(orimodel);
+	
+			String setter = "set" + xetter;
+			Method mySetter = null;
+			try {
+				mySetter = returnModel.getClass().getDeclaredMethod(setter, field.getType());
+				mySetter.invoke(returnModel, transValue);
+				b = true;
+			}catch(NoSuchMethodException e){// setter: Long-->long Integer-->int
+				if( field.getType().equals(Long.class)){
+					mySetter = returnModel.getClass().getDeclaredMethod(setter, long.class);
+				}
+				if( field.getType().equals(Integer.class)){
+					mySetter = returnModel.getClass().getDeclaredMethod(setter, int.class);
+				}
+				mySetter.invoke(returnModel, transValue);
+				b = true;
+			}
+    	} catch (Exception e1) {
+//    		e1.printStackTrace();
+		}
+
+    	return b;
     }
 }

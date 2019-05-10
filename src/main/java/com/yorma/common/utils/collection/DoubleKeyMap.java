@@ -7,9 +7,6 @@ import static java.util.Collections.sort;
 
 /**
  * <p>双键Map集合</p>
- * <p>包含put、get</p>
- * <p>获取副键和值的Map集合</p>
- * <p>全部值转成List和副键的值转成List</p>
  *
  * @param <K1> 主键
  * @param <K2> 副键
@@ -23,13 +20,21 @@ public class DoubleKeyMap<K1, K2, V> {
     private boolean ordered;
 
     public DoubleKeyMap() {
-        ordered = false;
-        map = new HashMap<>();
+        this(false);
+    }
+
+    public DoubleKeyMap(int size) {
+        this(false, size);
     }
 
     public DoubleKeyMap(boolean ordered) {
         this.ordered = ordered;
         map = ordered ? new LinkedHashMap<>() : new HashMap<>();
+    }
+
+    public DoubleKeyMap(boolean ordered, int size) {
+        this.ordered = ordered;
+        map = ordered ? new LinkedHashMap<>() : new HashMap<>(size);
     }
 
     public Boolean put(K1 k1, K2 k2, V v) {
