@@ -18,7 +18,9 @@ import static java.util.Collections.sort;
  */
 @SuppressWarnings("ALL")
 public class DoubleKeyMap<K1, K2, V> implements Serializable {
-    private Map<K1, Map<K2, V>> map;
+	private static final long serialVersionUID = 987749572332726095L;
+
+	private Map<K1, Map<K2, V>> map;
 
     private boolean ordered;
 

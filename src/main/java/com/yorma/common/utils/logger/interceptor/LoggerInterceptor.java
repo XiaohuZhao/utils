@@ -3,6 +3,7 @@ package com.yorma.common.utils.logger.interceptor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yorma.common.utils.logger.annotation.SysLogger;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
@@ -29,21 +30,23 @@ import java.util.stream.Collectors;
 @Aspect
 @Component
 public class LoggerInterceptor {
-	private static final String LOG_FORMAT = "[INFO][{}]->方法{}: {}";
-	private static final String BEGIN = "开始执行";
-	private static final String END = "执行结束";
-	private static final String PARAMS = "参数列表";
-	private static final String RESULT = "执行结果";
-	private static final String TIME = "执行用时";
+	private static final String LOG_FORMAT = "->{}: {}";
+//	private static final String LOG_FORMAT = "[INFO][{}]->方法{}: {}";
+	private static final String BEGIN = "STR";
+	private static final String END = "END";
+	private static final String PARAMS = "PAM";
+	private static final String RESULT = "RST";
+	private static final String TIME = "TIM";
 	private static final String CURRENT_THREAD = "当前线程";
 	private static Logger LOGGER;
     private static final String RESPONSE_MESSAGE = "com.yorma.common.entity.dto.ResponseMessage";
     private static final String RESPONSE_DATA = "com.yorma.common.entity.dto.ResponseData";
-    private static final int LIMIT_SIZE = 10;
+    private static final int LIMIT_SIZE = 1;
 
     private static String toJsonString(Object object) {
 		ObjectMapper objectMapper = new ObjectMapper();
 		String result = null;
+		if(object != null)
 		try {
 			StringBuffer resultBuilder = new StringBuffer("");
 			Object l = simplifyResult(object, resultBuilder);
@@ -70,7 +73,7 @@ public class LoggerInterceptor {
 	 */
 	public static void printResult(Logger logger, boolean print, Object result) {
 		if (print) {
-			logger.warn(LOG_FORMAT, formatDate(), RESULT, toJsonString(result));
+			logger.warn(LOG_FORMAT,  RESULT, toJsonString(result));
 		}
 	}
 
@@ -87,7 +90,7 @@ public class LoggerInterceptor {
 			if (args.length == 0) {
 				return;
 			}
-			logger.info(LOG_FORMAT, formatDate(), PARAMS, toJsonString(args));
+			logger.info(LOG_FORMAT,  PARAMS, toJsonString(args));
 		}
 	}
 
@@ -105,8 +108,8 @@ public class LoggerInterceptor {
 		Signature signature = point.getSignature();
 		boolean print = isPrint(targetClass, signature.toLongString());
 		System.out.println();
-		LOGGER.info(LOG_FORMAT, formatDate(), CURRENT_THREAD, Thread.currentThread().getName());
-		LOGGER.info(LOG_FORMAT, formatDate(), BEGIN, signature);
+//		LOGGER.debug(LOG_FORMAT,  CURRENT_THREAD, Thread.currentThread().getName());
+		LOGGER.info(LOG_FORMAT,  BEGIN, signature);
 		printParams(point, LOGGER, print);
 		Object result;
 		try {
@@ -116,10 +119,10 @@ public class LoggerInterceptor {
 			LOGGER.error(throwable.toString());
 			throw throwable;
 		}
-		LOGGER.info(LOG_FORMAT, formatDate(), END, signature);
+		LOGGER.info(LOG_FORMAT,  END, signature);
 		printResult(LOGGER, print, result);
 		final long end = System.currentTimeMillis();
-		LOGGER.info(LOG_FORMAT, formatDate(), TIME, (end - begin) + "ms");
+		LOGGER.info(LOG_FORMAT, TIME, (end - begin) + "ms");
 		System.out.println();
 		return result;
 	}
@@ -198,7 +201,7 @@ public class LoggerInterceptor {
 				r = null;
 				d = null;
 			}else {
-				System.out.println("Others..........: " + r.getClass());
+//				System.out.println("Others..........: " + r.getClass());
 			}
 
 			if(map != null) {
@@ -207,17 +210,17 @@ public class LoggerInterceptor {
 				int i = 0;
 				for(Object key : map.keySet()) {
 					m.put(key, map.get(key));
-					if(++i < 10)
+					if(++i < LIMIT_SIZE)
 						break;
 				}
 				
 				r = m;
 
-			}else if (l != null && l.size() > 50) {
+			}else if (l != null && l.size() > LIMIT_SIZE) {
 				x.append(l.size());
 
 				List li = new ArrayList();
-				for (int i = 0; i < 10; i++) {
+				for (int i = 0; i < LIMIT_SIZE; i++) {
 					li.add(l.get(i));
 				}
 				l = li;

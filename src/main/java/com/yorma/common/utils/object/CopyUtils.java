@@ -69,8 +69,7 @@ public class CopyUtils {
      * @throws InvocationTargetException  
      * @throws NoSuchMethodException  
      */    
-    public static Object clone(Object value,int level) throws IllegalAccessException, InstantiationException{    
-//    	, InvocationTargetException, NoSuchMethodException
+    public static Object clone(Object value,int level) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException{
     	if(value==null){
             return null;    
         }    
@@ -174,7 +173,7 @@ public class CopyUtils {
         return clone(value,1);    
     }
     
-    private static Object cloneArray(Object value, final int level, final Class c) throws IllegalAccessException, InstantiationException {
+    private static Object cloneArray(Object value, final int level, final Class c) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
         //首先判断是否为基本数据类型
         if (c.equals(int[].class)) {
             int[] old = (int[]) value;
@@ -300,23 +299,24 @@ public class CopyUtils {
 
     	try {
 	    	String xetter = field.getName().substring(0,1).toUpperCase() + field.getName().substring(1);
-			Method getMethod = orimodel.getClass().getDeclaredMethod("get" + xetter);
+			Method getMethod = orimodel.getClass().getMethod("get" + xetter);
 			Object transValue = getMethod.invoke(orimodel);
 	
 			String setter = "set" + xetter;
 			Method mySetter = null;
 			try {
-				mySetter = returnModel.getClass().getDeclaredMethod(setter, field.getType());
+				mySetter = returnModel.getClass().getMethod(setter, field.getType());
 				mySetter.invoke(returnModel, transValue);
 				b = true;
 			}catch(NoSuchMethodException e){// setter: Long-->long Integer-->int
 				if( field.getType().equals(Long.class)){
-					mySetter = returnModel.getClass().getDeclaredMethod(setter, long.class);
+					mySetter = returnModel.getClass().getMethod(setter, long.class);
 				}
 				if( field.getType().equals(Integer.class)){
-					mySetter = returnModel.getClass().getDeclaredMethod(setter, int.class);
+					mySetter = returnModel.getClass().getMethod(setter, int.class);
 				}
-				mySetter.invoke(returnModel, transValue);
+				if(transValue != null)
+					mySetter.invoke(returnModel, transValue);
 				b = true;
 			}
     	} catch (Exception e1) {
@@ -331,23 +331,24 @@ public class CopyUtils {
 
     	try {
 	    	String xetter = field.getName();
-			Method getMethod = orimodel.getClass().getDeclaredMethod("get" + xetter);
+			Method getMethod = orimodel.getClass().getMethod("get" + xetter);
 			Object transValue = getMethod.invoke(orimodel);
 	
 			String setter = "set" + xetter;
 			Method mySetter = null;
 			try {
-				mySetter = returnModel.getClass().getDeclaredMethod(setter, field.getType());
+				mySetter = returnModel.getClass().getMethod(setter, field.getType());
 				mySetter.invoke(returnModel, transValue);
 				b = true;
 			}catch(NoSuchMethodException e){// setter: Long-->long Integer-->int
 				if( field.getType().equals(Long.class)){
-					mySetter = returnModel.getClass().getDeclaredMethod(setter, long.class);
+					mySetter = returnModel.getClass().getMethod(setter, long.class);
 				}
 				if( field.getType().equals(Integer.class)){
-					mySetter = returnModel.getClass().getDeclaredMethod(setter, int.class);
+					mySetter = returnModel.getClass().getMethod(setter, int.class);
 				}
-				mySetter.invoke(returnModel, transValue);
+				if(transValue != null)
+					mySetter.invoke(returnModel, transValue);
 				b = true;
 			}
     	} catch (Exception e1) {
