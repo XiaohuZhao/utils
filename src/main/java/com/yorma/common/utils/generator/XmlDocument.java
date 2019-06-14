@@ -1,6 +1,5 @@
 package com.yorma.common.utils.generator;
 
-
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
@@ -106,7 +105,6 @@ public class XmlDocument {
 
         final String[] elementNames = elementNameSelector.split(">");
         for (String elementName : elementNames) {
-            System.out.println("\n查找:" + elementName);
             traversalElement(target, elementName.trim());
         }
         return target;

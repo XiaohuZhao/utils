@@ -65,7 +65,6 @@ public class XmlGenerator {
                         localName = localName + " xmlns=\"" + uri + "\"";
                     }
                 }
-
                 super.startElement(uri, localName, localName, atts);
             }
 
