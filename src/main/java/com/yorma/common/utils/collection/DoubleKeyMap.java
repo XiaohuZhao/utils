@@ -50,7 +50,12 @@ public class DoubleKeyMap<K1, K2, V> implements Serializable {
     }
 
     public Boolean put(K1 k1, Map<K2, V> subMap) {
-        return map.put(k1, subMap) != null;
+        if (map.containsKey(k1)) {
+            map.get(k1).putAll(subMap);
+        } else {
+            map.put(k1, subMap);
+        }
+        return true;
     }
 
     public Boolean put(DoubleKeyMap<K1, K2, V> doubleKeyMap) {
