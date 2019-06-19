@@ -95,11 +95,9 @@ public class XmlDocument {
      * <p>获取指定路径的节点</p>
      *
      * @param elementNameSelector 元素路径
-     * @return 所有符合指定路径的节点
+     * @return 第一个符合指定路径的节点
      */
     public Element getElement(String elementNameSelector) {
-
-
         // 获取根节点进行遍历
         target = document.getRootElement();
 
