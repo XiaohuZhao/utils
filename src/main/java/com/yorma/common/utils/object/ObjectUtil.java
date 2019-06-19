@@ -66,6 +66,8 @@ public class ObjectUtil {
     public static boolean isEmpty(Object t) {
         if (null == t) {
             return true;
+        } else if (t.getClass().isPrimitive() || t instanceof Boolean || t instanceof Number) {
+            return false;
         } else if (t instanceof Optional) {
             return !((Optional) t).isPresent();
         } else if (t instanceof String) {
@@ -77,10 +79,10 @@ public class ObjectUtil {
         } else if (t.getClass().isArray()) {
             return ArrayUtils.isEmpty((Object[]) t);
         } else {
-            return Arrays.stream(t.getClass().getDeclaredFields()).noneMatch(field -> {
+            return Arrays.stream(t.getClass().getDeclaredFields()).allMatch(field -> {
                 field.setAccessible(true);
                 try {
-                    return field.get(t) != null;
+                    return field.get(t) == null;
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);
                 }
