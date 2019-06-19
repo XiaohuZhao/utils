@@ -1,21 +1,14 @@
 package com.yorma.common.utils.object;
 
-import java.lang.reflect.Field;    
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;    
-import java.util.Collection;    
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;    
-import java.util.Set;
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;  
+import java.util.*;
 /**
  * @author 窦琪
- * @2018年1月10日
+ * @date 2018年1月10日
  */
 public class CopyUtils {
 	   
@@ -31,31 +24,26 @@ public class CopyUtils {
      * @return 如果不需要复制则返回真，否则返回假  
      */    
     private static boolean isNeedlessClone(Class c){
-        if(c.isPrimitive()){//基本类型    
-            return true;    
-        }    
-        for(Class tmp:needlessCloneClasses){//是否在无需复制类型数组里    
-            if(c.equals(tmp)){    
-                return true;    
-            }    
-        }    
-        return false;    
+	    //基本类型
+	    if (c.isPrimitive()) {
+            return true;
+	    }
+	    //是否在无需复制类型数组里
+	    return Arrays.asList(needlessCloneClasses).contains(c);
     }    
         
     /**  
      * 尝试创建新对象  
-     * @param c 原始对象  
+     * @param value 原始对象
      * @return 新的对象  
      * @throws IllegalAccessException  
      */    
     private static Object createObject(Object value) throws IllegalAccessException{    
             try {    
                 return value.getClass().newInstance();    
-            } catch (InstantiationException e) {    
-                return null;    
-            } catch (IllegalAccessException e) {    
-                throw e;    
-            }    
+            } catch (InstantiationException e) {
+	            return null;
+            }
     }    
         
     /**  
@@ -79,80 +67,88 @@ public class CopyUtils {
         Class c = value.getClass();    
         if(isNeedlessClone(c)){    
             return value;    
-        }    
-        level--;    
-        if(value instanceof Collection){//复制新的集合    
-            Collection tmp = (Collection)c.newInstance();    
-            for(Object v:(Collection)value){    
-                tmp.add(clone(v,level));//深度复制    
+        }
+	    level--;
+	    //复制新的集合
+	    if (value instanceof Collection) {
+            Collection tmp = (Collection)c.newInstance();
+		    for (Object v : (Collection) value) {
+			    //深度复制
+			    tmp.add(clone(v, level));
             }    
-            value = tmp;    
-        }    
-        else if(c.isArray()){//复制新的Array    
+            value = tmp;
+	    }
+	    //复制新的Array
+	    else if (c.isArray()) {
             //首先判断是否为基本数据类型    
-            if(c.equals(int[].class)){    
-                int[] old = (int[])value;    
-                value = (int[])Arrays.copyOf(old, old.length);    
+            if(c.equals(int[].class)){
+	            int[] old = (int[]) value;
+	            value = Arrays.copyOf(old, old.length);
             }    
-            else if(c.equals(short[].class)){    
-                short[] old = (short[])value;    
-                value = (short[])Arrays.copyOf(old, old.length);    
+            else if(c.equals(short[].class)){
+	            short[] old = (short[]) value;
+	            value = Arrays.copyOf(old, old.length);
             }    
-            else if(c.equals(char[].class)){    
-                char[] old = (char[])value;    
-                value = (char[])Arrays.copyOf(old, old.length);    
+            else if(c.equals(char[].class)){
+	            char[] old = (char[]) value;
+	            value = Arrays.copyOf(old, old.length);
             }    
-            else if(c.equals(float[].class)){    
-                float[] old = (float[])value;    
-                value = (float[])Arrays.copyOf(old, old.length);    
+            else if(c.equals(float[].class)){
+	            float[] old = (float[]) value;
+	            value = Arrays.copyOf(old, old.length);
             }    
-            else if(c.equals(double[].class)){    
-                double[] old = (double[])value;    
-                value = (double[])Arrays.copyOf(old, old.length);    
+            else if(c.equals(double[].class)){
+	            double[] old = (double[]) value;
+	            value = Arrays.copyOf(old, old.length);
             }    
-            else if(c.equals(long[].class)){    
-                long[] old = (long[])value;    
-                value = (long[])Arrays.copyOf(old, old.length);    
+            else if(c.equals(long[].class)){
+	            long[] old = (long[]) value;
+	            value = Arrays.copyOf(old, old.length);
             }    
-            else if(c.equals(boolean[].class)){    
-                boolean[] old = (boolean[])value;    
-                value = (boolean[])Arrays.copyOf(old, old.length);    
+            else if(c.equals(boolean[].class)){
+	            boolean[] old = (boolean[]) value;
+	            value = Arrays.copyOf(old, old.length);
             }    
-            else if(c.equals(byte[].class)){    
-                byte[] old = (byte[])value;    
-                value = (byte[])Arrays.copyOf(old, old.length);    
+            else if(c.equals(byte[].class)){
+	            byte[] old = (byte[]) value;
+	            value = Arrays.copyOf(old, old.length);
             }    
-            else {    
-                Object[] old = (Object[])value;    
-                Object[] tmp = (Object[])Arrays.copyOf(old, old.length, old.getClass());    
+            else {
+	            Object[] old = (Object[]) value;
+	            Object[] tmp = Arrays.copyOf(old, old.length, old.getClass());
                 for(int i = 0;i<old.length;i++){    
                     tmp[i] = clone(old[i],level);    
                 }    
                 value = tmp;    
-            }    
-        }    
-        else if(value instanceof Map){//复制新的MAP    
+            }
+	    }
+	    //复制新的MAP
+	    else if (value instanceof Map) {
             Map tmp = (Map)c.newInstance();    
-            Map org = (Map)value;    
-            for(Object key:org.keySet()){    
-                tmp.put(key, clone(org.get(key),level));//深度复制    
+            Map org = (Map)value;
+		    for (Object key : org.keySet()) {
+			    //深度复制
+			    tmp.put(key, clone(org.get(key), level));
             }    
             value = tmp;    
         }    
-        else {    
-            Object tmp = createObject(value);    
-            if(tmp==null){//无法创建新实例则返回对象本身，没有克隆    
-                return value;    
-            }    
-            Set<Field> fields = new HashSet<Field>();    
+        else {
+		    Object tmp = createObject(value);
+		    //无法创建新实例则返回对象本身，没有克隆
+		    if (tmp == null) {
+                return value;
+		    }
+		    Set<Field> fields = new HashSet<>();
             while(c!=null&&!c.equals(Object.class)){    
                 fields.addAll(Arrays.asList(c.getDeclaredFields()));    
                 c = c.getSuperclass();    
-            }    
-            for(Field field:fields){    
-                if(!Modifier.isFinal(field.getModifiers())){//仅复制非final字段    
-                    field.setAccessible(true);    
-                    field.set(tmp, clone(field.get(value),level));//深度复制    
+            }
+		    for (Field field : fields) {
+			    //仅复制非final字段
+			    if (!Modifier.isFinal(field.getModifiers())) {
+				    field.setAccessible(true);
+				    //深度复制
+				    field.set(tmp, clone(field.get(value), level));
                 }    
             }    
             value = tmp;    
@@ -191,36 +187,31 @@ public class CopyUtils {
      * @param <T1> 要转换的对象
      * @param <T2> 转换后的类
      * @param orimodel 要转换的对象
-     * @param castClass 转换后的类
+     * @param newObj 转换后的类
      * @return 转换后的对象
      */
     public static  <T1,T2> T2 convertBean(T1 orimodel, T2 newObj) {
-        T2 returnModel = newObj;
-        Class castClass=null;
-        try {
+	    Class castClass = null;
            castClass = newObj.getClass();
-        } catch (Exception e) {
-            throw new RuntimeException("创建"+castClass.getName()+"对象失败");
-        } 
-        List<Field> fieldlist = new ArrayList<Field>(); //要转换的字段集合
-        while (castClass != null && //循环获取要转换的字段,包括父类的字段
-                !castClass.getName().toLowerCase().equals("java.lang.object")) {
+	    //要转换的字段集合
+	    List<Field> fieldlist = new ArrayList<>();
+	    //循环获取要转换的字段,包括父类的字段
+	    while (castClass != null &&
+			    !"java.lang.object".equals(castClass.getName().toLowerCase())) {
             fieldlist.addAll(Arrays.asList(castClass.getDeclaredFields()));
-            castClass = (Class<T2>) castClass.getSuperclass(); //得到父类,然后赋给自己
+		    //得到父类,然后赋给自己
+		    castClass = (Class<T2>) castClass.getSuperclass();
         }
 
 		for (Field field : fieldlist) {
 			// ZJ @ 2019-05-10 修改后的方法支持非标准的get,set属性
-			if(setVal1(field, orimodel, returnModel) || setVal2(field, orimodel, returnModel)
-					|| setVal3(field, orimodel, returnModel)) {
-			}else {
-				System.out.printf("%s ==> %s 复制值 %s 失败!\r\n", orimodel.getClass().getName(), returnModel.getClass().getName(), field.getName());
-//				new RuntimeException("cast "+ orimodel.getClass().getName()+" to "
-//	                        + returnModel.getClass().getName()+" failed").printStackTrace();
+			if (!(setVal1(field, orimodel, newObj) || setVal2(field, orimodel, newObj)
+					|| setVal3(field, orimodel, newObj))) {
+				System.out.printf("%s ==> %s 复制值 %s 失败!\r\n", orimodel.getClass().getName(), newObj.getClass().getName(), field.getName());
             }
         }
-
-        return returnModel;
+	
+	    return newObj;
     }
 
     /**
@@ -241,10 +232,8 @@ public class CopyUtils {
 	        Object transValue = getMethod.invoke(orimodel);
 	        Method setMethod = setpd.getWriteMethod();
 	        setMethod.invoke(returnModel, transValue);
-	        
 	        b = true;
-		} catch (Exception e) {
-//			e.printStackTrace();
+		} catch (Exception ignore) {
 		}
 
         return b;
@@ -271,20 +260,21 @@ public class CopyUtils {
 				mySetter = returnModel.getClass().getDeclaredMethod(setter, field.getType());
 				mySetter.invoke(returnModel, transValue);
 				b = true;
-			}catch(NoSuchMethodException e){// setter: Long-->long Integer-->int
+			} catch (NoSuchMethodException e) {
+				// setter: Long-->long Integer-->int
 				if( field.getType().equals(Long.class)){
 					mySetter = returnModel.getClass().getDeclaredMethod(setter, long.class);
 				}
 				if( field.getType().equals(Integer.class)){
 					mySetter = returnModel.getClass().getDeclaredMethod(setter, int.class);
 				}
-				mySetter.invoke(returnModel, transValue);
-				b = true;
+				if (mySetter != null) {
+					mySetter.invoke(returnModel, transValue);
+					b = true;
+				}
 			}
-    	} catch (Exception e1) {
-//    		e1.printStackTrace();
+	    } catch (Exception ignore) {
 		}
-
     	return b;
     }
     
@@ -312,10 +302,8 @@ public class CopyUtils {
 				mySetter.invoke(returnModel, transValue);
 				b = true;
 			}
-    	} catch (Exception e1) {
-//    		e1.printStackTrace();
+	    } catch (Exception ignore) {
 		}
-
     	return b;
     }
 }
