@@ -1,4 +1,4 @@
-package com.yorma.common.utils.generator;
+package com.yorma.common.utils.xml;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
