@@ -1,16 +1,15 @@
 package com.yorma.common.utils.packages;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import static com.yorma.common.utils.object.ObjectUtil.isNotEmpty;
+import static java.lang.String.format;
+import static java.lang.Thread.currentThread;
 
 /**
  * @author yangying
@@ -25,7 +24,7 @@ public class PackageUtil {
      * @return 类的完整名称
      * @throws IOException 文件读取失败
      */
-    public static Set<String> getClassNames(String packageName) throws IOException {
+    public static List<String> getClassNames(final String packageName) throws IOException {
         return getClassNames(packageName, true);
     }
 
@@ -37,17 +36,17 @@ public class PackageUtil {
      * @return 类的完整名称
      * @throws IOException 文件读取失败
      */
-    public static Set<String> getClassNames(String packageName, boolean childPackage) throws IOException {
-        Set<String> fileNames = new HashSet<>();
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        String packagePath = packageName.replace(".", "/");
-        Enumeration<URL> urls = loader.getResources(packagePath);
+    public static List<String> getClassNames(final String packageName, final boolean childPackage) throws IOException {
+        final List<String> fileNames = new ArrayList<>();
+        final ClassLoader loader = currentThread().getContextClassLoader();
+        final String packagePath = packageName.replace(".", "/");
+        final Enumeration<URL> urls = loader.getResources(packagePath);
         while (urls.hasMoreElements()) {
-            URL url = urls.nextElement();
+            final URL url = urls.nextElement();
             if (url == null) {
                 continue;
             }
-            String type = url.getProtocol();
+            final String type = url.getProtocol();
             if ("file".equals(type)) {
                 fileNames.addAll(getClassNameByFile(url.getPath(), childPackage));
             } else if ("jar".equals(type)) {
@@ -65,14 +64,14 @@ public class PackageUtil {
      * @param childPackage 是否遍历子包
      * @return 类的完整名称
      */
-    private static Set<String> getClassNameByFile(String filePath, boolean childPackage) {
-        Set<String> myClassName = new HashSet<>();
-        File file = new File(filePath);
-        File[] childFiles = file.listFiles();
+    private static List<String> getClassNameByFile(final String filePath, final boolean childPackage) {
+        final List<String> myClassName = new ArrayList<>();
+        final File file = new File(filePath);
+        final File[] childFiles = file.listFiles();
         if (childFiles == null) {
             return myClassName;
         }
-        for (File childFile : childFiles) {
+        for (final File childFile : childFiles) {
             if (childFile.isDirectory()) {
                 if (childPackage) {
                     myClassName.addAll(getClassNameByFile(childFile.getPath(), childPackage));
@@ -96,15 +95,15 @@ public class PackageUtil {
      * @param childPackage 是否遍历子包
      * @return 类的完整名称
      */
-    private static Set<String> getClassNameByJar(String jarPath, boolean childPackage) throws IOException {
-        Set<String> myClassName = new HashSet<>();
-        String[] jarInfo = jarPath.split("!");
-        String jarFilePath = jarInfo[0].substring(jarInfo[0].indexOf("/"));
-        String packagePath = jarInfo[1].substring(1);
-        JarFile jarFile = new JarFile(jarFilePath);
-        Enumeration<JarEntry> entries = jarFile.entries();
+    private static List<String> getClassNameByJar(final String jarPath, final boolean childPackage) throws IOException {
+        final List<String> myClassName = new ArrayList<>();
+        final String[] jarInfo = jarPath.split("!");
+        final String jarFilePath = jarInfo[0].substring(jarInfo[0].indexOf("/"));
+        final String packagePath = jarInfo[1].substring(1);
+        final JarFile jarFile = new JarFile(jarFilePath);
+        final Enumeration<JarEntry> entries = jarFile.entries();
         while (entries.hasMoreElements()) {
-            JarEntry jarEntry = entries.nextElement();
+            final JarEntry jarEntry = entries.nextElement();
             String entryName = jarEntry.getName();
             if (entryName.endsWith(".class")) {
                 if (childPackage) {
@@ -113,8 +112,8 @@ public class PackageUtil {
                         myClassName.add(entryName);
                     }
                 } else {
-                    int index = entryName.lastIndexOf("/");
-                    String myPackagePath;
+                    final int index = entryName.lastIndexOf("/");
+                    final String myPackagePath;
                     if (index != -1) {
                         myPackagePath = entryName.substring(0, index);
                     } else {
@@ -139,16 +138,16 @@ public class PackageUtil {
      * @param childPackage 是否遍历子包
      * @return 类的完整名称
      */
-    private static Set<String> getClassNameByJars(URL[] urls, String packagePath, boolean childPackage) throws IOException {
-        final Set<String> myClassName = new HashSet<>();
+    private static List<String> getClassNameByJars(final URL[] urls, final String packagePath, final boolean childPackage) throws IOException {
+        final List<String> myClassName = new ArrayList<>();
         if (isNotEmpty(urls)) {
-            for (URL url : urls) {
-                String urlPath = url.getPath();
+            for (final URL url : urls) {
+                final String urlPath = url.getPath();
                 // 不必搜索classes文件夹
-                if (urlPath.endsWith(String.format("classes%s", File.separator))) {
+                if (urlPath.endsWith(format("classes%s", File.separator))) {
                     continue;
                 }
-                String jarPath = String.format("%s!%s%s", urlPath, File.separator, packagePath);
+                final String jarPath = format("%s!%s%s", urlPath, File.separator, packagePath);
                 myClassName.addAll(getClassNameByJar(jarPath, childPackage));
             }
         }
