@@ -8,49 +8,49 @@
     <groupId>com.yorma</groupId>
     <artifactId>common-util-spring</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
-            <version>1.9.2</version>
+            <version>LATEST</version>
         </dependency>
         <!--日志记录-->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
+            <version>LATEST</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.25</version>
+            <version>LATEST</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.9</version>
+            <version>LATEST</version>
         </dependency>
         <dependency>
             <groupId>dom4j</groupId>
             <artifactId>dom4j</artifactId>
-            <version>1.6.1</version>
+            <version>LATEST</version>
         </dependency>
         <dependency>
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
-            <version>3.6</version>
+            <version>LATEST</version>
         </dependency>
          <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>4.3.11.RELEASE</version>
+            <version>LATEST</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.8.1</version>
+            <version>LATEST</version>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
@@ -60,43 +60,48 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.3</version>
+            <version>LATEST</version>
         </dependency>
         <!-- xml格式转成json格式 -->
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20180813</version>
+            <version>LATEST</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>LATEST</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+        <groupId>com.alibaba</groupId>
+        <artifactId>fastjson</artifactId>
+        <version>LATEST</version>
+    </dependency>
 
     </dependencies>
     <!-- 发布项目配置 -->
     <!-- 局域网公共仓库 -->
-    <distributionManagement>
-        <repository>
-            <id>expresafeRelease</id>
-            <url>http://192.168.1.6:8081/nexus/content/repositories/expresafeRelease/</url>
-        </repository>
+<!--    <distributionManagement>-->
+<!--        <repository>-->
+<!--            <id>expresafeRelease</id>-->
+<!--            <url>http://192.168.1.6:8081/nexus/content/repositories/expresafeRelease/</url>-->
+<!--        </repository>-->
 
-        <snapshotRepository>
-            <id>expresafeSnapshot</id>
-            <url>http://192.168.1.6:8081/nexus/content/repositories/expresafeSnapshot</url>
-        </snapshotRepository>
-    </distributionManagement>
+<!--        <snapshotRepository>-->
+<!--            <id>expresafeSnapshot</id>-->
+<!--            <url>http://192.168.1.6:8081/nexus/content/repositories/expresafeSnapshot</url>-->
+<!--        </snapshotRepository>-->
+<!--    </distributionManagement>-->
 
-    <repositories>
-        <repository>
-            <id>expresafeRepos</id>
-            <name>expresafeRepos</name>
-            <url>http://192.168.1.6:8081/nexus/content/groups/expresafeGroup/</url>
-        </repository>
-    </repositories>
+<!--    <repositories>-->
+<!--        <repository>-->
+<!--            <id>expresafeRepos</id>-->
+<!--            <name>expresafeRepos</name>-->
+<!--            <url>http://192.168.1.6:8081/nexus/content/groups/expresafeGroup/</url>-->
+<!--        </repository>-->
+<!--    </repositories>-->
 
     <build>
         <plugins>
