@@ -1,4 +1,4 @@
-package com.yorma.common.utils.generator;
+package com.yorma.common.utils.xml;
 
 import javax.xml.bind.JAXBException;
 import java.io.Serializable;
@@ -7,7 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-import static com.yorma.common.utils.generator.XmlGenerator.generateXmlStr;
+import static com.yorma.common.utils.xml.XmlUtil.toXmlString;
 
 /**
  * 传输类转换成xml实体类继承的接口
@@ -49,12 +49,12 @@ public interface Transformable<T> extends Serializable {
      * @throws JAXBException
      * 		xml 对应的实体解析时出现异常
      */
-    static String toXmlStr(Class aClass, Object xmlObj, Object... params) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, JAXBException {
+    static String toXmlStr(Class<? extends Transformable> aClass, Object xmlObj, Object... params) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, JAXBException {
         Class[] classes = Arrays.stream(params).map(Object::getClass).toArray(Class[]::new);
         final Constructor constructor = aClass.getDeclaredConstructor(classes);
         final Object instance = constructor.newInstance(params);
         final Method transform = aClass.getDeclaredMethod("transform", xmlObj.getClass());
         final Transformable transformable = (Transformable) transform.invoke(instance, xmlObj);
-        return generateXmlStr(transformable);
+        return toXmlString(transformable);
     }
 }
