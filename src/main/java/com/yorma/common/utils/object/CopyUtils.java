@@ -69,8 +69,8 @@ public class CopyUtils {
      * @throws InvocationTargetException  
      * @throws NoSuchMethodException  
      */    
-    public static Object clone(Object value,int level) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException{
-    	if(value==null){
+    public static Object clone(Object value,int level) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException{    
+        if(value==null){    
             return null;    
         }    
         if(level==0){    
@@ -171,44 +171,7 @@ public class CopyUtils {
      */    
     public static Object clone(Object value) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException{    
         return clone(value,1);    
-    }
-    
-    private static Object cloneArray(Object value, final int level, final Class c) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
-        //首先判断是否为基本数据类型
-        if (c.equals(int[].class)) {
-            int[] old = (int[]) value;
-            value = Arrays.copyOf(old, old.length);
-        } else if (c.equals(short[].class)) {
-            short[] old = (short[]) value;
-            value = Arrays.copyOf(old, old.length);
-        } else if (c.equals(char[].class)) {
-            char[] old = (char[]) value;
-            value = Arrays.copyOf(old, old.length);
-        } else if (c.equals(float[].class)) {
-            float[] old = (float[]) value;
-            value = Arrays.copyOf(old, old.length);
-        } else if (c.equals(double[].class)) {
-            double[] old = (double[]) value;
-            value = Arrays.copyOf(old, old.length);
-        } else if (c.equals(long[].class)) {
-            long[] old = (long[]) value;
-            value = Arrays.copyOf(old, old.length);
-        } else if (c.equals(boolean[].class)) {
-            boolean[] old = (boolean[]) value;
-            value = Arrays.copyOf(old, old.length);
-        } else if (c.equals(byte[].class)) {
-            byte[] old = (byte[]) value;
-            value = Arrays.copyOf(old, old.length);
-        } else {
-            Object[] old = (Object[]) value;
-            Object[] tmp = Arrays.copyOf(old, old.length, old.getClass());
-            for (int i = 0; i < old.length; i++) {
-                tmp[i] = clone(old[i], level);
-            }
-            value = tmp;
-        }
-        return value;
-    }
+    }    
         
     /**  
      * 深度复制对象  
@@ -299,24 +262,23 @@ public class CopyUtils {
 
     	try {
 	    	String xetter = field.getName().substring(0,1).toUpperCase() + field.getName().substring(1);
-			Method getMethod = orimodel.getClass().getMethod("get" + xetter);
+			Method getMethod = orimodel.getClass().getDeclaredMethod("get" + xetter);
 			Object transValue = getMethod.invoke(orimodel);
 	
 			String setter = "set" + xetter;
 			Method mySetter = null;
 			try {
-				mySetter = returnModel.getClass().getMethod(setter, field.getType());
+				mySetter = returnModel.getClass().getDeclaredMethod(setter, field.getType());
 				mySetter.invoke(returnModel, transValue);
 				b = true;
 			}catch(NoSuchMethodException e){// setter: Long-->long Integer-->int
 				if( field.getType().equals(Long.class)){
-					mySetter = returnModel.getClass().getMethod(setter, long.class);
+					mySetter = returnModel.getClass().getDeclaredMethod(setter, long.class);
 				}
 				if( field.getType().equals(Integer.class)){
-					mySetter = returnModel.getClass().getMethod(setter, int.class);
+					mySetter = returnModel.getClass().getDeclaredMethod(setter, int.class);
 				}
-				if(transValue != null)
-					mySetter.invoke(returnModel, transValue);
+				mySetter.invoke(returnModel, transValue);
 				b = true;
 			}
     	} catch (Exception e1) {
@@ -331,24 +293,23 @@ public class CopyUtils {
 
     	try {
 	    	String xetter = field.getName();
-			Method getMethod = orimodel.getClass().getMethod("get" + xetter);
+			Method getMethod = orimodel.getClass().getDeclaredMethod("get" + xetter);
 			Object transValue = getMethod.invoke(orimodel);
 	
 			String setter = "set" + xetter;
 			Method mySetter = null;
 			try {
-				mySetter = returnModel.getClass().getMethod(setter, field.getType());
+				mySetter = returnModel.getClass().getDeclaredMethod(setter, field.getType());
 				mySetter.invoke(returnModel, transValue);
 				b = true;
 			}catch(NoSuchMethodException e){// setter: Long-->long Integer-->int
 				if( field.getType().equals(Long.class)){
-					mySetter = returnModel.getClass().getMethod(setter, long.class);
+					mySetter = returnModel.getClass().getDeclaredMethod(setter, long.class);
 				}
 				if( field.getType().equals(Integer.class)){
-					mySetter = returnModel.getClass().getMethod(setter, int.class);
+					mySetter = returnModel.getClass().getDeclaredMethod(setter, int.class);
 				}
-				if(transValue != null)
-					mySetter.invoke(returnModel, transValue);
+				mySetter.invoke(returnModel, transValue);
 				b = true;
 			}
     	} catch (Exception e1) {
