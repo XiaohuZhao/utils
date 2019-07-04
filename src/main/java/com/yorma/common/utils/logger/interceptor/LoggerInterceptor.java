@@ -3,6 +3,7 @@ package com.yorma.common.utils.logger.interceptor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yorma.common.utils.logger.annotation.SysLogger;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
@@ -15,12 +16,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 拦截方法,判断是否有@SysLogger注解并采取动作
@@ -33,23 +30,28 @@ import java.util.Map;
 @Aspect
 @Component
 public class LoggerInterceptor {
-	public static final String LOG_FORMAT = "[INFO][{}]->方法{}: {}";
-	public static final String BEGIN = "开始执行";
-	public static final String END = "执行结束";
-	public static final String PARAMS = "参数列表";
-	public static final String RESULT = "执行结果";
-	public static final String TIME = "执行用时";
-	public static final String CURRENT_THREAD = "当前线程";
-	public static Logger LOGGER;
+	private static final String LOG_FORMAT = "->{}: {}";
+//	private static final String LOG_FORMAT = "[INFO][{}]->方法{}: {}";
+	private static final String BEGIN = "STR";
+	private static final String END = "END";
+	private static final String PARAMS = "PAM";
+	private static final String RESULT = "RST";
+	private static final String TIME = "TIM";
+	private static final String CURRENT_THREAD = "当前线程";
+	private static Logger LOGGER;
+    private static final String RESPONSE_MESSAGE = "com.yorma.common.entity.dto.ResponseMessage";
+    private static final String RESPONSE_DATA = "com.yorma.common.entity.dto.ResponseData";
+    private static final int LIMIT_SIZE = 1;
 
-	private static String toJsonString(Object object) {
+    private static String toJsonString(Object object) {
 		ObjectMapper objectMapper = new ObjectMapper();
 		String result = null;
+		if(object != null)
 		try {
-			StringBuffer x = new StringBuffer("");
-			Object l = simplifyResult(object, x);
+			StringBuffer resultBuilder = new StringBuffer("");
+			Object l = simplifyResult(object, resultBuilder);
 			if (l != null) {
-				result = objectMapper.writeValueAsString(l).replace("}]", "}......first 10 of " + x + " ]");
+				result = objectMapper.writeValueAsString(l).replace("}]", "}......first " + LIMIT_SIZE + " of " + resultBuilder + " ]");
 			} else
 				result = objectMapper.writeValueAsString(object);
 		} catch (JsonProcessingException e) {
@@ -65,28 +67,22 @@ public class LoggerInterceptor {
 	/**
 	 * 在控制台输出方法的返回结果
 	 *
-	 * @param logger
-	 *            日志记录对象
-	 * @param print
-	 *            是否打印
-	 * @param result
-	 *            方法的返回结果
+	 * @param logger         日志记录对象
+	 * @param print          是否打印
+	 * @param result         方法的返回结果
 	 */
 	public static void printResult(Logger logger, boolean print, Object result) {
 		if (print) {
-			logger.warn(LOG_FORMAT, formatDate(), RESULT, toJsonString(result));
+			logger.warn(LOG_FORMAT,  RESULT, toJsonString(result));
 		}
 	}
 
 	/**
 	 * 在控制台输出方法参数
 	 *
-	 * @param point
-	 *            切点
-	 * @param logger
-	 *            日志记录对象
-	 * @param print
-	 *            是否打印
+	 * @param point       切点
+	 * @param logger      日志记录对象
+	 * @param print       是否打印
 	 */
 	public static void printParams(ProceedingJoinPoint point, Logger logger, boolean print) {
 		if (print) {
@@ -94,15 +90,14 @@ public class LoggerInterceptor {
 			if (args.length == 0) {
 				return;
 			}
-			logger.info(LOG_FORMAT, formatDate(), PARAMS, toJsonString(args));
+			logger.info(LOG_FORMAT,  PARAMS, toJsonString(args));
 		}
 	}
 
 	/**
 	 * 如果有@SysLogger注解采取的动作
 	 *
-	 * @param point
-	 *            切点
+	 * @param point     切点
 	 * @return 方法返回的结果
 	 */
 	@Around(value = "@within(com.yorma.common.utils.logger.annotation.SysLogger) || @annotation(com.yorma.common.utils.logger.annotation.SysLogger)")
@@ -113,8 +108,8 @@ public class LoggerInterceptor {
 		Signature signature = point.getSignature();
 		boolean print = isPrint(targetClass, signature.toLongString());
 		System.out.println();
-		LOGGER.info(LOG_FORMAT, formatDate(), CURRENT_THREAD, Thread.currentThread().getName());
-		LOGGER.info(LOG_FORMAT, formatDate(), BEGIN, signature);
+//		LOGGER.debug(LOG_FORMAT,  CURRENT_THREAD, Thread.currentThread().getName());
+		LOGGER.info(LOG_FORMAT,  BEGIN, signature);
 		printParams(point, LOGGER, print);
 		Object result;
 		try {
@@ -124,10 +119,10 @@ public class LoggerInterceptor {
 			LOGGER.error(throwable.toString());
 			throw throwable;
 		}
-		LOGGER.info(LOG_FORMAT, formatDate(), END, signature);
+		LOGGER.info(LOG_FORMAT,  END, signature);
 		printResult(LOGGER, print, result);
 		final long end = System.currentTimeMillis();
-		LOGGER.info(LOG_FORMAT, formatDate(), TIME, (end - begin) + "ms");
+		LOGGER.info(LOG_FORMAT, TIME, (end - begin) + "ms");
 		System.out.println();
 		return result;
 	}
@@ -135,10 +130,8 @@ public class LoggerInterceptor {
 	/**
 	 * 返回注解的print值
 	 *
-	 * @param targetClass
-	 *            SysLogger标注的目标类或方法所在的类
-	 * @param longMethodSignature
-	 *            方法声明
+	 * @param targetClass           SysLogger标注的目标类或方法所在的类
+	 * @param longMethodSignature   方法声明
 	 * @return 是否打印
 	 */
 	public boolean isPrint(Class targetClass, String longMethodSignature) {
@@ -151,8 +144,6 @@ public class LoggerInterceptor {
 	}
 
 
-
-
     /**
      * 简化 List<T> 日志输出信息
      *
@@ -161,10 +152,6 @@ public class LoggerInterceptor {
      * @return 简化后的返回结果
      */
 	private static Object simplifyResult(Object object, StringBuffer x) {
-		String C_RS_MSG = "com.yorma.common.entity.dto.ResponseMessage";
-		String C_RS_DATA = "com.yorma.common.entity.dto.ResponseData";
-
-//		System.err.println("Classssss: " + object.getClass().getName());
 
 		Object r = object;
 		Object d = null;
@@ -172,8 +159,8 @@ public class LoggerInterceptor {
 		Map<?, ?> map = null;
 
 		try {
-			Class cr = Class.forName(C_RS_MSG);
-			Class cd = Class.forName(C_RS_DATA);
+			Class cr = Class.forName(RESPONSE_MESSAGE);
+			Class cd = Class.forName(RESPONSE_DATA);
 
 			Constructor cnt_r = cr.getDeclaredConstructor(Boolean.class, String.class, String.class);
 			Method mr = cr.getDeclaredMethod("getData");
@@ -182,7 +169,6 @@ public class LoggerInterceptor {
 			Method mr2 = cr.getDeclaredMethod("getMsg");
 			Method mr3 = cr.getDeclaredMethod("setData", Object.class);
 
-//			Constructor cnt_d = cd.getDeclaredConstructor(Integer.class, Integer.class, Integer.class, Integer.class,
 			Constructor cnt_d = cd.getDeclaredConstructor(int.class, int.class, int.class, Integer.TYPE, List.class);
 			Method ml = cd.getDeclaredMethod("getList");
 			Method ml0 = cd.getDeclaredMethod("getPageSize");
@@ -215,7 +201,7 @@ public class LoggerInterceptor {
 				r = null;
 				d = null;
 			}else {
-				System.out.println("Others..........: " + r.getClass());
+//				System.out.println("Others..........: " + r.getClass());
 			}
 
 			if(map != null) {
@@ -224,18 +210,17 @@ public class LoggerInterceptor {
 				int i = 0;
 				for(Object key : map.keySet()) {
 					m.put(key, map.get(key));
-					if(++i < 10)
+					if(++i < LIMIT_SIZE)
 						break;
 				}
 				
 				r = m;
 
-			}else
-			if (l != null && l.size() > 50) {
+			}else if (l != null && l.size() > LIMIT_SIZE) {
 				x.append(l.size());
 
 				List li = new ArrayList();
-				for (int i = 0; i < 10; i++) {
+				for (int i = 0; i < LIMIT_SIZE; i++) {
 					li.add(l.get(i));
 				}
 				l = li;
@@ -272,5 +257,25 @@ public class LoggerInterceptor {
 
 		return r;
 	}
+
+    /**
+     * 处理集合类的数据
+     *
+     * @param data          集合
+     * @param resultBuilder 输出条数
+     * @return 处理后的结果
+     */
+    private static Object dataHandler(Object data, final StringBuilder resultBuilder) {
+        if (data instanceof Collection) {
+            final Collection collection = (Collection) data;
+            resultBuilder.append(collection.size());
+            data = collection.stream().limit(LIMIT_SIZE).collect(Collectors.toList());
+        } else if (data instanceof Map) {
+            final Map map = (Map) data;
+            resultBuilder.append(map.size());
+            data = ((Set<Map.Entry>) map.entrySet()).stream().limit(LIMIT_SIZE).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        }
+        return data;
+    }
 
 }
