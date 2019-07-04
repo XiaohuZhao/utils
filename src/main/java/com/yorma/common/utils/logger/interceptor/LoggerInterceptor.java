@@ -11,16 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 拦截方法,判断是否有@SysLogger注解并采取动作
@@ -33,7 +26,7 @@ import java.util.Map;
 @Aspect
 @Component
 public class LoggerInterceptor {
-	public static final String LOG_FORMAT = "[INFO][{}]->方法{}: {}";
+	public static final String LOG_FORMAT = "[{}]->方法{}: {}";
 	public static final String BEGIN = "开始执行";
 	public static final String END = "执行结束";
 	public static final String PARAMS = "参数列表";
@@ -43,19 +36,13 @@ public class LoggerInterceptor {
 	public static Logger LOGGER;
 
 	private static String toJsonString(Object object) {
-		ObjectMapper objectMapper = new ObjectMapper();
-		String result = null;
+		final ObjectMapper objectMapper = new ObjectMapper();
 		try {
-			StringBuffer x = new StringBuffer("");
-			Object l = simplifyResult(object, x);
-			if (l != null) {
-				result = objectMapper.writeValueAsString(l).replace("}]", "}......first 10 of " + x + " ]");
-			} else
-				result = objectMapper.writeValueAsString(object);
+			return objectMapper.writeValueAsString(object);
 		} catch (JsonProcessingException e) {
 			LOGGER.error(e.getMessage());
+			throw new RuntimeException(e);
 		}
-		return result;
 	}
 
 	public static String formatDate() {
@@ -80,21 +67,18 @@ public class LoggerInterceptor {
 
 	/**
 	 * 在控制台输出方法参数
-	 *
-	 * @param point
-	 *            切点
+	 *  @param params
+	 *            参数
 	 * @param logger
 	 *            日志记录对象
-	 * @param print
-	 *            是否打印
+	 * @param print 是否打印
 	 */
-	public static void printParams(ProceedingJoinPoint point, Logger logger, boolean print) {
+	public static void printParams(Object[] params, Logger logger, boolean print) {
 		if (print) {
-			Object[] args = point.getArgs();
-			if (args.length == 0) {
+			if (params.length == 0) {
 				return;
 			}
-			logger.info(LOG_FORMAT, formatDate(), PARAMS, toJsonString(args));
+			logger.info(LOG_FORMAT, formatDate(), PARAMS, toJsonString(params));
 		}
 	}
 
@@ -107,26 +91,42 @@ public class LoggerInterceptor {
 	 */
 	@Around(value = "@within(com.yorma.common.utils.logger.annotation.SysLogger) || @annotation(com.yorma.common.utils.logger.annotation.SysLogger)")
 	public Object logger(ProceedingJoinPoint point) throws Throwable {
-		final long begin = System.currentTimeMillis();
-		Class targetClass = point.getTarget().getClass();
+		// 获取拦截到的具体类
+		final Class targetClass = point.getTarget().getClass();
+		// 获取当前类的logger对象
 		LOGGER = LoggerFactory.getLogger(targetClass);
-		Signature signature = point.getSignature();
-		boolean print = isPrint(targetClass, signature.toLongString());
+		// 方法签名
+		final Signature signature = point.getSignature();
+		// 判断改方法是否需要打印参数和返回结果
+		final boolean print = isPrint(targetClass, signature.toLongString());
 		System.out.println();
+		// 记录当前线程
 		LOGGER.info(LOG_FORMAT, formatDate(), CURRENT_THREAD, Thread.currentThread().getName());
+		// 记录方法开始执行
 		LOGGER.info(LOG_FORMAT, formatDate(), BEGIN, signature);
-		printParams(point, LOGGER, print);
-		Object result;
+		// 记录方法参数
+		printParams(point.getArgs(), LOGGER, print);
+		// 开始执行方法
+		final Object result;
+		// 记录方法开始执行的时间
+		final long begin = System.currentTimeMillis();
 		try {
 			result = point.proceed();
 		} catch (Throwable throwable) {
-			throwable.printStackTrace();
-			LOGGER.error(throwable.toString());
+			// 记录方法执行时抛出的异常
+			final StackTraceElement[] stackTrace = throwable.getStackTrace();
+			for (StackTraceElement stackTraceElement : stackTrace) {
+				LOGGER.error(stackTraceElement.toString());
+			}
 			throw throwable;
 		}
-		LOGGER.info(LOG_FORMAT, formatDate(), END, signature);
-		printResult(LOGGER, print, result);
+		// 记录方法执行结束的时间
 		final long end = System.currentTimeMillis();
+		// 记录方法执行结束
+		LOGGER.info(LOG_FORMAT, formatDate(), END, signature);
+		// 记录方法返回结果
+		printResult(LOGGER, print, result);
+		// 记录方法执行用时
 		LOGGER.info(LOG_FORMAT, formatDate(), TIME, (end - begin) + "ms");
 		System.out.println();
 		return result;
@@ -149,128 +149,4 @@ public class LoggerInterceptor {
 								&& method.isAnnotationPresent(SysLogger.class))
 						.anyMatch(method -> method.getAnnotation(SysLogger.class).print());
 	}
-
-
-
-
-    /**
-     * 简化 List<T> 日志输出信息
-     *
-     * @param object        方法实际返回结果
-     * @param resultBuilder 拼接输出结果
-     * @return 简化后的返回结果
-     */
-	private static Object simplifyResult(Object object, StringBuffer x) {
-		String C_RS_MSG = "com.yorma.common.entity.dto.ResponseMessage";
-		String C_RS_DATA = "com.yorma.common.entity.dto.ResponseData";
-
-//		System.err.println("Classssss: " + object.getClass().getName());
-
-		Object r = object;
-		Object d = null;
-		List<?> l = null;
-		Map<?, ?> map = null;
-
-		try {
-			Class cr = Class.forName(C_RS_MSG);
-			Class cd = Class.forName(C_RS_DATA);
-
-			Constructor cnt_r = cr.getDeclaredConstructor(Boolean.class, String.class, String.class);
-			Method mr = cr.getDeclaredMethod("getData");
-			Method mr0 = cr.getDeclaredMethod("getSuccess");
-			Method mr1 = cr.getDeclaredMethod("getStatus");
-			Method mr2 = cr.getDeclaredMethod("getMsg");
-			Method mr3 = cr.getDeclaredMethod("setData", Object.class);
-
-//			Constructor cnt_d = cd.getDeclaredConstructor(Integer.class, Integer.class, Integer.class, Integer.class,
-			Constructor cnt_d = cd.getDeclaredConstructor(int.class, int.class, int.class, Integer.TYPE, List.class);
-			Method ml = cd.getDeclaredMethod("getList");
-			Method ml0 = cd.getDeclaredMethod("getPageSize");
-			Method ml1 = cd.getDeclaredMethod("getPageNumber");
-			Method ml2 = cd.getDeclaredMethod("getTotalPage");
-			Method ml3 = cd.getDeclaredMethod("getTotalRow");
-
-			if (r.getClass().equals(cr)) {
-				d = mr.invoke(r);
-
-				if(d==null)
-					return null;
-				if (cd.equals(d.getClass())) {
-					l = (List) ml.invoke(d);
-
-				} else if (d instanceof List) {
-					l = (List<?>) d;
-					d = null;
-				}
-
-			}else if(r instanceof List) {
-//				System.out.println("List..........XXXXXX: " + r.getClass());
-				l = (List)r;
-				r = null;
-				d = null;
-
-			}else if(r instanceof Map) {
-//				System.out.println("Map..........MMMMMM: " + r.getClass());
-				map = (Map)r;
-				r = null;
-				d = null;
-			}else {
-				System.out.println("Others..........: " + r.getClass());
-			}
-
-			if(map != null) {
-				x.append(map.size());
-				HashMap m = new HashMap();
-				int i = 0;
-				for(Object key : map.keySet()) {
-					m.put(key, map.get(key));
-					if(++i < 10)
-						break;
-				}
-				
-				r = m;
-
-			}else
-			if (l != null && l.size() > 50) {
-				x.append(l.size());
-
-				List li = new ArrayList();
-				for (int i = 0; i < 10; i++) {
-					li.add(l.get(i));
-				}
-				l = li;
-
-				if(r == null) {
-					r = l;
-				}else if (d == null) {
-					r = cnt_r.newInstance(mr0.invoke(r), mr1.invoke(r), mr2.invoke(r));
-					mr3.invoke(r, l);
-
-				} else {
-					d = cnt_d.newInstance(ml0.invoke(d), ml1.invoke(d), ml2.invoke(d), ml3.invoke(d), l);
-					r = cnt_r.newInstance(mr0.invoke(r), mr1.invoke(r), mr2.invoke(r));
-					mr3.invoke(r, d);
-
-				}
-			}
-
-		} catch (ClassNotFoundException e) {
-
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		}
-
-		return r;
-	}
-
 }

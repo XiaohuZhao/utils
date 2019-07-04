@@ -7,9 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * 处理对象的一些方法
@@ -66,6 +64,8 @@ public class ObjectUtil {
     public static boolean isEmpty(Object t) {
         if (null == t) {
             return true;
+        } else if (t.getClass().isPrimitive() || t instanceof Boolean || t instanceof Number) {
+            return false;
         } else if (t instanceof Optional) {
             return !((Optional) t).isPresent();
         } else if (t instanceof String) {
@@ -77,14 +77,7 @@ public class ObjectUtil {
         } else if (t.getClass().isArray()) {
             return ArrayUtils.isEmpty((Object[]) t);
         } else {
-            return Arrays.stream(t.getClass().getDeclaredFields()).noneMatch(field -> {
-                field.setAccessible(true);
-                try {
-                    return field.get(t) != null;
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            return false;
         }
     }
     
@@ -177,65 +170,6 @@ public class ObjectUtil {
     }
     
     /**
-     * 如果传入的第一个参数不为空，返回进行某个操作后的结果，否则返回null
-     *
-     * @param t
-     *         不为空的参数
-     * @param function
-     *         对不为空的参数进行的操作
-     * @param <R>
-     *         操作后的返回结果的类型
-     * @return 对不为空参数处理后的结果
-     */
-    public static <T, R> R ifNotEmpty(T t, Function<T, R> function) {
-        if (isNotEmpty(t)) {
-            return function.apply(t);
-        }
-        return null;
-    }
-    
-    /**
-     * <p>根据第一个参数和与第一个参数有关的boolean表达式的boolean值</p>
-     * <p>判断为true则执行后面的动作</p>
-     *
-     * @param t
-     *         第一个参数
-     * @param predicate
-     *         与第一个参数有关的boolean表达式
-     * @param consumer
-     *         如果表达式为true采取的动作
-     * @param <T>
-     *         第一个参数的实际类型
-     */
-    public static <T> void ifMatch(T t, Predicate<T> predicate, Consumer<T> consumer) {
-        if (predicate.test(t)) {
-            consumer.accept(t);
-        }
-    }
-    
-    /**
-     * 根据第一个参数和与第一个参数有关的boolean表达式的boolean值， 判断为true则执行第一个动作，否则执行第二个动作
-     *
-     * @param t
-     *         第一个参数
-     * @param predicate
-     *         与第一个参数有关的boolean表达式
-     * @param ifTrue
-     *         如果表达式为true采取的动作
-     * @param ifFalse
-     *         如果表达式为false采取的动作
-     * @param <T>
-     *         第一个参数的实际类型
-     */
-    public static <T> void ifMatch(T t, Predicate<T> predicate, Consumer<T> ifTrue, Consumer<T> ifFalse) {
-        if (predicate.test(t)) {
-            ifTrue.accept(t);
-        } else {
-            ifFalse.accept(t);
-        }
-    }
-    
-    /**
      * <p>判断对象是否不为空</p>
      * <p>引用指向的地址不为空</p>
      * <p>指向的值存在</p>
@@ -252,6 +186,23 @@ public class ObjectUtil {
     }
     
     /**
+     * 如果对象不为空则对对象进行处理
+     *
+     * @param t
+     * 		要判断的对象
+     * @param function
+     * 		要对非空对象进行的处理
+     * @param <T>
+     * 		源对象类型
+     * @param <R>
+     * 		处理后对象的类型
+     * @return 处理后的对象
+     */
+    public static <T, R> R ifNotEmpty(T t, Function<T, R> function) {
+        return isNotEmpty(t) ? function.apply(t) : null;
+    }
+    
+    /**
      * 将对象转成int类型的数字
      *
      * @param o
@@ -265,6 +216,13 @@ public class ObjectUtil {
         return Integer.parseInt(o.toString());
     }
     
+    /**
+     * 将对象转成double类型的数字
+     *
+     * @param o
+     *         要转的对象
+     * @return 对象中的数字
+     */
     public static double parseDouble(Object o) {
         if (isEmpty(o)) {
             throw new NullPointerException("转换的对象不可为空");

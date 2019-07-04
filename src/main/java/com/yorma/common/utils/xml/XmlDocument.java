@@ -1,5 +1,4 @@
-package com.yorma.common.utils.generator;
-
+package com.yorma.common.utils.xml;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -96,20 +95,17 @@ public class XmlDocument {
      * <p>获取指定路径的节点</p>
      *
      * @param elementNameSelector 元素路径
-     * @return 所有符合指定路径的节点
+     * @return 第一个符合指定路径的节点
      */
     public Element getElement(String elementNameSelector) {
-
-
         // 获取根节点进行遍历
         target = document.getRootElement();
 
         final String[] elementNames = elementNameSelector.split(">");
         for (String elementName : elementNames) {
-            System.out.println("\n查找:" + elementName);
             traversalElement(target, elementName.trim());
         }
-        return target;
+        return target.getName().equals(elementNames[elementNames.length - 1]) ? target : null;
     }
 
     /**
