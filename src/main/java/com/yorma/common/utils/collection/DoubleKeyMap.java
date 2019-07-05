@@ -2,7 +2,6 @@ package com.yorma.common.utils.collection;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
@@ -53,7 +52,12 @@ public class DoubleKeyMap<K1, K2, V> implements Serializable {
     }
 
     public Boolean put(K1 k1, Map<K2, V> subMap) {
-        return map.put(k1, subMap) != null;
+        if (map.containsKey(k1)) {
+            map.get(k1).putAll(subMap);
+        } else {
+            map.put(k1, subMap);
+        }
+        return true;
     }
 
     public Boolean put(DoubleKeyMap<K1, K2, V> doubleKeyMap) {
@@ -61,6 +65,14 @@ public class DoubleKeyMap<K1, K2, V> implements Serializable {
             this.put(k1, k2, v);
         });
         return true;
+    }
+    
+    public int size() {
+        return map.values().stream().map(Map::size).reduce((size1, size2) -> size1 + size2).get();
+    }
+    
+    public Map<K1, Map<K2, V>> toMap() {
+        return map;
     }
 
     public Map<K2, V> get(K1 k1) {
@@ -91,24 +103,13 @@ public class DoubleKeyMap<K1, K2, V> implements Serializable {
         return ordered;
     }
 
-    public void setOrdered(boolean ordered) {
-        this.ordered = ordered;
-    }
-
     public Boolean containsValue(V v) {
-        final Map<K2, V> subMap = (Map<K2, V>) map.values();
-        return subMap.containsValue(v);
+        return map.values().stream().parallel().anyMatch(value -> value.containsValue(v));
     }
 
     @SuppressWarnings("unchecked")
     public Boolean containsSubKey(K2 k2) {
-        AtomicReference<Boolean> containsSubKey = new AtomicReference<>(false);
-        final Set<Map.Entry<K1, Map<K2, V>>> entries = map.entrySet();
-        entries.forEach(entry -> {
-            final Map<K2, V> subMap = (Map<K2, V>) entry;
-            containsSubKey.set(subMap.containsKey(k2));
-        });
-        return containsSubKey.get();
+        return map.values().stream().parallel().anyMatch(k2VMap -> k2VMap.containsKey(k2));
     }
 
     public List<V> getListOfAll() {
@@ -152,5 +153,9 @@ public class DoubleKeyMap<K1, K2, V> implements Serializable {
     
     public Stream<Map.Entry<K1, Map<K2, V>>> stream(){
         return map.entrySet().stream();
+    }
+    
+    public void clear(){
+        map.clear();
     }
 }

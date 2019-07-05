@@ -126,62 +126,6 @@ public class StringUtils {
     }
 
     /**
-     * <p>
-     * Checks if a String is not empty (""), not null and not whitespace only.
-     * </p>
-     *
-     * <pre>
-     * StringUtils.isNotBlank(null)      = false
-     * StringUtils.isNotBlank("")        = false
-     * StringUtils.isNotBlank(" ")       = false
-     * StringUtils.isNotBlank("bob")     = true
-     * StringUtils.isNotBlank("  bob  ") = true
-     * </pre>
-     *
-     * @param str the String to check, may be null
-     * @return <code>true</code> if the String is not empty and not null and not
-     * whitespace
-     * @see com.yorma.common.utils.object.ObjectUtil#isNotEmpty(Object)
-     * @since 2.0
-     */
-    @Deprecated
-    public static boolean isNotBlank(String str) {
-        return !org.apache.commons.lang3.StringUtils.isBlank(str);
-    }
-
-    /**
-     * <p>
-     * Checks if a String is whitespace, empty ("") or null.
-     * </p>
-     *
-     * <pre>
-     * StringUtils.isBlank(null)      = true
-     * StringUtils.isBlank("")        = true
-     * StringUtils.isBlank(" ")       = true
-     * StringUtils.isBlank("bob")     = false
-     * StringUtils.isBlank("  bob  ") = false
-     * </pre>
-     *
-     * @param str the String to check, may be null
-     * @return <code>true</code> if the String is null, empty or whitespace
-     * @see com.yorma.common.utils.object.ObjectUtil#isEmpty(Object)
-     * @since 2.0
-     */
-    @Deprecated
-    public static boolean isBlank(String str) {
-        int strLen;
-        if (str == null || (strLen = str.length()) == 0) {
-            return true;
-        }
-        for (int i = 0; i < strLen; i++) {
-            if ((!Character.isWhitespace(str.charAt(i)))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
      * 去掉小数点后面不需要的0
      *
      * @param str 需要去除的字符串
