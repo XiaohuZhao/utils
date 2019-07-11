@@ -1,6 +1,7 @@
 package com.yorma.common.utils.mail;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -21,6 +22,10 @@ public class SimpleMail {
 			throw new IllegalMailFormatException();
 		}
 		this.recipients = recipients;
+	}
+	
+	public void setRecipient(final String recipient) {
+		this.setRecipients(Collections.singletonList(recipient));
 	}
 	
 	public String getSubject() {
