@@ -75,10 +75,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-        <groupId>com.alibaba</groupId>
-        <artifactId>fastjson</artifactId>
-        <version>LATEST</version>
-    </dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>LATEST</version>
+        </dependency>
 
     </dependencies>
     <!-- 发布项目配置 -->
