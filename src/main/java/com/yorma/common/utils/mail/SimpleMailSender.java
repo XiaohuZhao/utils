@@ -8,10 +8,9 @@ import javax.mail.*;
 import javax.mail.internet.*;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.util.List;
 import java.util.Properties;
 
-import static com.yorma.common.utils.object.ObjectUtil.isNotEmpty;
+import static com.yorma.common.utils.object.ObjectUtil.ifNotEmpty;
 import static java.lang.System.getProperties;
 import static javax.mail.Session.getInstance;
 import static javax.mail.internet.MimeUtility.encodeWord;
@@ -117,11 +116,10 @@ public class SimpleMailSender {
 		message.setSubject(mail.getSubject());
 		final Multipart multipart = new MimeMultipart();
 		final BodyPart contentPart = new MimeBodyPart();
-		contentPart.setContent(mail.getContent(), "text/html;charset=UTF-8");
+		contentPart.setContent(mail.getContent().replace("\n", "<br/>"), "text/html;charset=UTF-8");
 		multipart.addBodyPart(contentPart);
-		final List<File> attachments = mail.getAttachments();
-		if (isNotEmpty(attachments)) {
-			attachments.forEach(attachment -> {
+		ifNotEmpty(mail.getAttachments(), attachments -> {
+			for (File attachment : attachments) {
 				final BodyPart attachmentBodyPart = new MimeBodyPart();
 				final DataSource source = new FileDataSource(attachment);
 				try {
@@ -131,8 +129,8 @@ public class SimpleMailSender {
 				} catch (MessagingException | UnsupportedEncodingException e) {
 					throw new RuntimeException(e);
 				}
-			});
-		}
+			}
+		});
 		message.setContent(multipart);
 		Transport.send(message);
 	}
