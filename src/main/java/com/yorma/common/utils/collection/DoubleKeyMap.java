@@ -52,7 +52,14 @@ public class DoubleKeyMap<K1, K2, V> implements Serializable, Iterable<Map.Entry
             return map.put(k1, subMap) == subMap;
         }
     }
-
+    
+    public Boolean putIfAbsent(K1 k1, K2 k2, V v) {
+        if (map.containsKey(k1) && map.get(k1).get(k2) != null) {
+            return false;
+        }
+        return put(k1, k2, v);
+    }
+    
     public Boolean put(K1 k1, Map<K2, V> subMap) {
         if (map.containsKey(k1) && map.get(k1) != null) {
             map.get(k1).putAll(subMap);
@@ -65,6 +72,13 @@ public class DoubleKeyMap<K1, K2, V> implements Serializable, Iterable<Map.Entry
     public Boolean put(DoubleKeyMap<K1, K2, V> that) {
         that.forEach((k1, k2, v) -> {
             this.put(k1, k2, v);
+        });
+        return true;
+    }
+    
+    public Boolean putIfAbsent(DoubleKeyMap<K1, K2, V> that) {
+        that.forEach((k1, k2, v) -> {
+            this.putIfAbsent(k1, k2, v);
         });
         return true;
     }
