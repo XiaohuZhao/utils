@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -202,6 +203,20 @@ public class ObjectUtil {
 	 */
 	public static <T, R> R ifNotEmpty(T t, Function<T, R> function) {
 		return isNotEmpty(t) ? function.apply(t) : null;
+	}
+	
+	/**
+	 * 如果对象不为空则对对象进行处理
+	 *
+	 * @param t
+	 * 		要判断的对象
+	 * @param consumer
+	 * 		要对非空对象进行的处理
+	 * @param <T>
+	 * 		源对象类型
+	 */
+	public static <T> void ifNotEmpty(T t, Consumer<T> consumer) {
+		consumer.accept(t);
 	}
 	
 	/**
