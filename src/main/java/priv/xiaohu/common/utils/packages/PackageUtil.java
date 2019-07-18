@@ -1,4 +1,4 @@
-package com.yorma.common.utils.packages;
+package priv.xiaohu.common.utils.packages;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import static com.yorma.common.utils.object.ObjectUtil.isNotEmpty;
+import static priv.xiaohu.common.utils.object.ObjectUtil.isNotEmpty;
 import static java.lang.String.format;
 import static java.lang.Thread.currentThread;
 

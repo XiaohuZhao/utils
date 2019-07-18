@@ -1,4 +1,4 @@
-package com.yorma.common.utils.object;
+package priv.xiaohu.common.utils.object;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

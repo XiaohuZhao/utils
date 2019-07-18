@@ -1,4 +1,4 @@
-package com.yorma.common.utils.object;
+package priv.xiaohu.common.utils.object;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.util.CollectionUtils;
@@ -216,7 +216,9 @@ public class ObjectUtil {
 	 * 		源对象类型
 	 */
 	public static <T> void ifNotEmpty(T t, Consumer<T> consumer) {
-		consumer.accept(t);
+		if (isNotEmpty(t)) {
+			consumer.accept(t);
+		}
 	}
 	
 	/**

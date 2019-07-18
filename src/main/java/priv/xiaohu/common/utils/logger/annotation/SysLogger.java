@@ -1,4 +1,4 @@
-package com.yorma.common.utils.logger.annotation;
+package priv.xiaohu.common.utils.logger.annotation;
 
 import java.lang.annotation.*;
 

@@ -1,4 +1,4 @@
-package com.yorma.common.utils.xml;
+package priv.xiaohu.common.utils.xml;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;

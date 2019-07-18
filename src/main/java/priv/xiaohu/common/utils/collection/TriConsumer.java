@@ -1,4 +1,4 @@
-package com.yorma.common.utils.collection;
+package priv.xiaohu.common.utils.collection;
 
 /**
  * @author zxh

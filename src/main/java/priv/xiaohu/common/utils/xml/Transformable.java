@@ -1,4 +1,4 @@
-package com.yorma.common.utils.xml;
+package priv.xiaohu.common.utils.xml;
 
 import javax.xml.bind.JAXBException;
 import java.io.Serializable;
@@ -6,8 +6,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-
-import static com.yorma.common.utils.xml.XmlUtil.toXmlString;
 
 /**
  * 传输类转换成xml实体类继承的接口
@@ -50,11 +48,35 @@ public interface Transformable<T> extends Serializable {
      * 		xml 对应的实体解析时出现异常
      */
     static String toXmlStr(Class<? extends Transformable> aClass, Object xmlObj, Object... params) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, JAXBException {
+        return XmlUtil.toXmlString(transform(aClass,xmlObj,params));
+    }
+    
+    /**
+     * <p>将实现Transformable接口的实体类对象</p>
+     * <p>按照自定义的转换规则重写的transform(T)方法</p>
+     * <p>转换成Transformable对象</p>
+     *
+     * @param aClass
+     * 		要转换成的实体类型
+     * @param xmlObj
+     * 		要进行转换的的对象
+     * @param params
+     * 		构造器的参数
+     * @return 转换成的对象
+     * @throws NoSuchMethodException
+     * 		实体类没有重写transform(T) 方法
+     * @throws IllegalAccessException
+     * 		方法访问权限异常, 不会出现
+     * @throws InvocationTargetException
+     * 		调用目标时出现异常, 实现的transform(T) 方法中抛出异常时出现
+     * @throws InstantiationException
+     * 		实例化出现异常, 一般是构造器参数不正确
+     */
+    static Transformable transform(Class<? extends Transformable> aClass, Object xmlObj, Object... params) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         Class[] classes = Arrays.stream(params).map(Object::getClass).toArray(Class[]::new);
         final Constructor constructor = aClass.getDeclaredConstructor(classes);
         final Object instance = constructor.newInstance(params);
         final Method transform = aClass.getDeclaredMethod("transform", xmlObj.getClass());
-        final Transformable transformable = (Transformable) transform.invoke(instance, xmlObj);
-        return toXmlString(transformable);
+        return  (Transformable) transform.invoke(instance, xmlObj);
     }
 }
