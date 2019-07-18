@@ -1,0 +1,39 @@
+# utils
+包含集合工具
+collection
+  集合和集合工具
+  -CollectionUtil
+    splitEntities(Collection)
+    splitEntities(Map)
+      将Collection或Map集合按照指定大小分成若干组
+  -DoubleKeyMap
+    使用两个键映射一个值的集合(由java.util.Mapqian'dao嵌套实现)
+    具备基本的增删改查功能
+      (新增，删除，返回主键个数，返回主键和副键集合，是否存在主键、副键、值，
+        获取主键对应的所有值或集合中所有值\遍历，迭代器，克隆，实体流(Stream<Entry>))
+  -TriConsumer
+    接收三个参数没有返回值的函数式接口
+logger
+  日志记录(由log4j和切面实现，需要手动加入到spring容器扫描“priv.xiaohu.common.utils.logger”包）
+  -SysLogger
+    注解类，（被spring扫描后）被此注解标记的类或方法会增加环绕通知
+  -LoggerInterceptor
+    切面拦截器，hui为拦截到的方法增加环绕通知（方法开始，传入的参数，方法结束，返回结果，执行时间）
+object
+  -ObjectUtil
+    对象的常用工具
+    包括判断对象必要、可选、默认值、单个或多个对象是否为空、以及shi'zi数字类型转换等
+  -CopyUtils
+    对象的浅复制和深复制
+packages
+  -PackageUtil
+    获取包（支持jar包）下所有的全类名
+xml
+  -Transformable
+    可转换类接口
+      实现此类和方法的对象可以使用本工具类根据自定义的方法完成类型转换并可以生成xml文档格式的字符串
+  -XmlDocument
+    在org.dom4j.Document的基础上新增了标签选择器，可以使用路径精确查找一个或多个节点
+  -XmlUtil
+    简单的xml格式和json格式的转换
+  
