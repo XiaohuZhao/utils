@@ -189,7 +189,7 @@ public class ObjectUtil {
 	}
 	
 	/**
-	 * 如果对象不为空则对对象进行处理
+	 * 如果对象不为空则对对象进行处理并返回处理后的对象
 	 *
 	 * @param t
 	 * 		要判断的对象
@@ -244,10 +244,7 @@ public class ObjectUtil {
 	 * @return 对象中的数字
 	 */
 	public static int parseInt(Object o) {
-		if (isEmpty(o)) {
-			throw new NullPointerException("转换的对象不可为空");
-		}
-		return Integer.parseInt(o.toString());
+		return Integer.parseInt(required(o).toString());
 	}
 	
 	/**
@@ -258,9 +255,6 @@ public class ObjectUtil {
 	 * @return 对象中的数字
 	 */
 	public static double parseDouble(Object o) {
-		if (isEmpty(o)) {
-			throw new NullPointerException("转换的对象不可为空");
-		}
-		return Double.parseDouble(o.toString());
+		return Double.parseDouble(required(o).toString());
 	}
 }
